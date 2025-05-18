@@ -86,7 +86,7 @@ namespace backend.Repositories
                     {
                         if (await reader.ReadAsync())
                         {
-                            return new UserDTO
+                            var user = new UserDTO
                             {
                                 Id = reader.GetInt32("id"),
                                 Username = reader.GetString("username"),
@@ -99,8 +99,28 @@ namespace backend.Repositories
                                 Salt = reader.GetString("password_salt"),
                                 CreatedAt = reader.GetDateTime("created_at"),
                                 LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? (DateTime?)null : reader.GetDateTime("last_login"),
-                                FailedAttempts = reader.GetInt32("failed_attempts")
+                                // Default to 0 if column doesn't exist
+                                FailedAttempts = 0
                             };
+
+                            // Try to get failed_attempts if it exists
+                            try
+                            {
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    if (reader.GetName(i).Equals("failed_attempts", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        user.FailedAttempts = reader.GetInt32(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Warning: Failed to get failed_attempts: {ex.Message}");
+                            }
+
+                            return user;
                         }
                     }
                     return null;

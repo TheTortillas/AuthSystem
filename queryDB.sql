@@ -107,7 +107,7 @@ BEGIN
 END$$
 
 DELIMITER $$
--- Procedimiento para obtener un usuario por email
+-- Procedimiento para obtener un usuario por email (Updated version)
 CREATE PROCEDURE sp_get_user_by_email(
     IN p_email VARCHAR(50),
     OUT p_status_code INT,
@@ -132,9 +132,10 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- Return the user as a result set
-        SELECT id, username, given_names, p_surname, m_surname, email, phone_number, 
-               password_hash, password_salt, created_at, last_login, failed_attempts
+        -- Return the user as a result set - Ensure failed_attempts is included
+        SELECT 
+            id, username, given_names, p_surname, m_surname, email, phone_number, 
+            password_hash, password_salt, created_at, last_login, failed_attempts
         FROM users
         WHERE email = p_email;
         
@@ -144,3 +145,4 @@ BEGIN
     
     COMMIT;
 END$$
+DELIMITER ;
