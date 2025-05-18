@@ -79,6 +79,37 @@ namespace backend.Controllers.UserManagement
         }
 
         /// <summary>
+        /// Authenticates a user with username and issues a JWT token
+        /// </summary>
+        /// <param name="request">Login information with username</param>
+        /// <returns>JWT token or error message</returns>
+        [HttpPost("SignInUsername", Name = "PostSignInUsername")]
+        public async Task<IActionResult> LoginWithUsername([FromBody] UsernameLoginRequestDTO request)
+        {
+            try
+            {
+                var (user, errorMessage, statusCode) = await _authService.AuthenticateByUsernameAsync(request);
+
+                if (user == null)
+                {
+                    return StatusCode(statusCode, new { message = errorMessage });
+                }
+
+                // Update login success (reset failed attempts and update last login)
+                await _authService.UpdateLoginSuccessAsync(user.Id);
+
+                // Generate JWT token
+                string token = _jwtService.CreateToken(user);
+
+                return Ok(new AuthResponseDTO { Token = token });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error interno del servidor: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
         /// Refreshes the JWT token
         /// </summary>
         /// <returns>New JWT token or error message</returns>

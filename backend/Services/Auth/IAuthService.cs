@@ -8,6 +8,7 @@ namespace backend.Services.Auth
     {
         Task<bool> RegisterUserAsync(RegisterRequestDTO request);
         Task<(UserDTO? User, string? ErrorMessage, int StatusCode)> AuthenticateUserAsync(LoginRequestDTO request);
+        Task<(UserDTO? User, string? ErrorMessage, int StatusCode)> AuthenticateByUsernameAsync(UsernameLoginRequestDTO request);
         Task<bool> IncrementFailedAttemptsAsync(int userId);
         Task<bool> UpdateLoginSuccessAsync(int userId);
     }

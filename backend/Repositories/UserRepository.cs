@@ -172,5 +172,79 @@ namespace backend.Repositories
                 return false;
             }
         }
+
+        public async Task<UserDTO?> GetUserByUsernameAsync(string username)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(_config.GetConnectionString("default")))
+                {
+                    MySqlCommand cmd = new MySqlCommand("sp_get_user_by_username", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("p_username", username);
+
+                    MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    MySqlParameter messageParam = new MySqlParameter("p_message", MySqlDbType.VarChar, 255)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(statusParam);
+                    cmd.Parameters.Add(messageParam);
+
+                    await con.OpenAsync();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            var user = new UserDTO
+                            {
+                                Id = reader.GetInt32("id"),
+                                Username = reader.GetString("username"),
+                                GivenNames = reader.GetString("given_names"),
+                                PSurname = reader.GetString("p_surname"),
+                                MSurname = reader.IsDBNull(reader.GetOrdinal("m_surname")) ? null : reader.GetString("m_surname"),
+                                Email = reader.GetString("email"),
+                                PhoneNumber = reader.GetString("phone_number"),
+                                Password = reader.GetString("password_hash"),
+                                Salt = reader.GetString("password_salt"),
+                                CreatedAt = reader.GetDateTime("created_at"),
+                                LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? (DateTime?)null : reader.GetDateTime("last_login"),
+                                FailedAttempts = 0
+                            };
+
+                            // Try to get failed_attempts if it exists
+                            try
+                            {
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    if (reader.GetName(i).Equals("failed_attempts", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        user.FailedAttempts = reader.GetInt32(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Warning: Failed to get failed_attempts: {ex.Message}");
+                            }
+
+                            return user;
+                        }
+                    }
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

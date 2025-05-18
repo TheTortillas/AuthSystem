@@ -81,6 +81,38 @@ namespace backend.Services.Auth
             return (user, null, 200);
         }
 
+        public async Task<(UserDTO? User, string? ErrorMessage, int StatusCode)> AuthenticateByUsernameAsync(UsernameLoginRequestDTO request)
+        {
+            // Find user by username
+            var user = await _userRepository.GetUserByUsernameAsync(request.Username);
+
+            if (user == null)
+            {
+                return (null, "Usuario no encontrado", 401);
+            }
+
+            // Check if account is locked
+            if (user.FailedAttempts >= SecurityConstants.MaxFailedAttempts)
+            {
+                return (null, "Cuenta bloqueada por múltiples intentos fallidos. Contacte a soporte.", 423);
+            }
+
+            // Verify password
+            var saltedPassword = request.Password + user.Salt;
+            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(null, user.Password, saltedPassword);
+
+            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            {
+                // Increment failed attempts counter
+                await _userRepository.IncrementFailedAttemptsAsync(user.Id);
+
+                int remainingAttempts = SecurityConstants.MaxFailedAttempts - (user.FailedAttempts + 1);
+                return (null, $"Contraseña incorrecta. Intentos restantes: {remainingAttempts}", 401);
+            }
+
+            return (user, null, 200);
+        }
+
         public async Task<bool> IncrementFailedAttemptsAsync(int userId)
         {
             return await _userRepository.IncrementFailedAttemptsAsync(userId);

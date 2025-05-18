@@ -6,6 +6,7 @@ namespace backend.Repositories.Interfaces
     {
         Task<bool> CreateUserAsync(UserDTO user);
         Task<UserDTO?> GetUserByEmailAsync(string email);
+        Task<UserDTO?> GetUserByUsernameAsync(string username);
         Task<bool> IncrementFailedAttemptsAsync(int userId);
         Task<bool> UpdateLoginSuccessAsync(int userId);
     }

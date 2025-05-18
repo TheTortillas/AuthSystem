@@ -145,4 +145,43 @@ BEGIN
     
     COMMIT;
 END$$
+DELIMITER $$
+-- Procedimiento para obtener un usuario por username
+CREATE PROCEDURE sp_get_user_by_username(
+    IN p_username VARCHAR(50),
+    OUT p_status_code INT,
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE user_exists INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_status_code = 500;
+        SET p_message = 'Error: No se pudo obtener el usuario.';
+    END;
+
+    START TRANSACTION;
+    
+    -- Check if user exists
+    SELECT COUNT(*) INTO user_exists FROM users WHERE username = p_username;
+    
+    IF user_exists = 0 THEN
+        SET p_status_code = 404;
+        SET p_message = 'Error: Usuario no encontrado.';
+    ELSE
+        -- Return the user as a result set
+        SELECT 
+            id, username, given_names, p_surname, m_surname, email, phone_number, 
+            password_hash, password_salt, created_at, last_login, failed_attempts
+        FROM users
+        WHERE username = p_username;
+        
+        SET p_status_code = 200;
+        SET p_message = 'Usuario obtenido exitosamente.';
+    END IF;
+    
+    COMMIT;
+END$$
 DELIMITER ;
