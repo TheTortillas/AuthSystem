@@ -1,10 +1,8 @@
 ﻿using backend.DTOs.Auth;
-using backend.DTOs.Users;
+using backend.Services.Auth;
 using backend.Services.JWT;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 
 namespace backend.Controllers.UserManagement
 {
@@ -12,26 +10,13 @@ namespace backend.Controllers.UserManagement
     [ApiController]
     public class UserManagementController : ControllerBase
     {
-        private readonly IConfiguration _config;
-        private readonly DBManager _dbManager;
-        private readonly IPasswordHasher<RegisterRequestDTO> _passwordHasher;
+        private readonly IAuthService _authService;
+        private readonly jwtService _jwtService;
 
-        public UserManagementController(IConfiguration config)
+        public UserManagementController(IAuthService authService, jwtService jwtService)
         {
-            _config = config;
-            _dbManager = new DBManager(_config);
-            _passwordHasher = new PasswordHasher<RegisterRequestDTO>();
-        }
-
-        // Método para generar un salt
-        private string GenerateSalt(int size = 16)
-        {
-            var saltBytes = new byte[size];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(saltBytes);
-            }
-            return Convert.ToBase64String(saltBytes);
+            _authService = authService;
+            _jwtService = jwtService;
         }
 
         [HttpPost("SignUp", Name = "PostSignUp")]
@@ -39,22 +24,7 @@ namespace backend.Controllers.UserManagement
         {
             try
             {
-                var salt = GenerateSalt();
-                var saltedPassword = request.Password + salt;
-
-                var user = new UserDTO
-                {
-                    Username = request.Username,
-                    GivenNames = request.GivenNames,
-                    PSurname = request.PSurname,
-                    MSurname = request.MSurname,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = _passwordHasher.HashPassword(request, saltedPassword),
-                    Salt = salt,
-                };
-
-                var success = await _dbManager.SignUpAsync(user);
+                var success = await _authService.RegisterUserAsync(request);
 
                 if (!success)
                 {
@@ -74,39 +44,18 @@ namespace backend.Controllers.UserManagement
         {
             try
             {
-                // Buscar el usuario por email
-                var user = await _dbManager.FindByEmailAsync(request.Email);
+                var (user, errorMessage, statusCode) = await _authService.AuthenticateUserAsync(request);
 
                 if (user == null)
                 {
-                    return Unauthorized(new { message = "Usuario no encontrado" });
+                    return StatusCode(statusCode, new { message = errorMessage });
                 }
 
-                // Verificar si la cuenta está bloqueada
-                if (user.FailedAttempts >= 5)
-                {
-                    return StatusCode(423, new { message = "Cuenta bloqueada por múltiples intentos fallidos. Contacte a soporte." });
-                }
+                // Update login success (reset failed attempts and update last login)
+                await _authService.UpdateLoginSuccessAsync(user.Id);
 
-                // Verificar la contraseña
-                var saltedPassword = request.Password + user.Salt;
-                var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(null, user.Password, saltedPassword);
-
-                if (passwordVerificationResult == PasswordVerificationResult.Failed)
-                {
-                    // Incrementar el contador de intentos fallidos
-                    await _dbManager.IncrementFailedAttemptsAsync(user.Id);
-
-                    int remainingAttempts = 5 - (user.FailedAttempts + 1);
-                    return Unauthorized(new { message = $"Contraseña incorrecta. Intentos restantes: {remainingAttempts}" });
-                }
-
-                // Restablecer intentos fallidos y actualizar último inicio de sesión
-                await _dbManager.UpdateLoginSuccessAsync(user.Id);
-
-                // Generar el token JWT
-                var jwtService = new jwtService(_config);
-                string token = jwtService.CreateToken(user);
+                // Generate JWT token
+                string token = _jwtService.CreateToken(user);
 
                 return Ok(new AuthResponseDTO { Token = token });
             }
@@ -129,8 +78,7 @@ namespace backend.Controllers.UserManagement
 
             try
             {
-                var jwtService = new jwtService(_config);
-                var newToken = jwtService.RefreshToken(token);
+                var newToken = _jwtService.RefreshToken(token);
                 return Ok(new { token = newToken });
             }
             catch (SecurityTokenException ex)

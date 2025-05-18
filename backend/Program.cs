@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using backend.DTOs.Auth;
+using backend.Repositories;
+using backend.Repositories.Interfaces;
+using backend.Services.Auth;
+using backend.Services.JWT;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -38,6 +44,12 @@ builder.Services.AddSwaggerGen(setup =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
+
+// Register repositories and services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IPasswordHasher<RegisterRequestDTO>, PasswordHasher<RegisterRequestDTO>>();
+builder.Services.AddSingleton<jwtService>();
 
 // Configuracion de JWT
 builder.Services.AddAuthentication(options =>
