@@ -6,6 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Controllers.UserManagement
 {
+    /// <summary>
+    /// Controller for user authentication and management
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class UserManagementController : ControllerBase
@@ -19,6 +22,11 @@ namespace backend.Controllers.UserManagement
             _jwtService = jwtService;
         }
 
+        /// <summary>
+        /// Registers a new user
+        /// </summary>
+        /// <param name="request">Registration information</param>
+        /// <returns>Success or error message</returns>
         [HttpPost("SignUp", Name = "PostSignUp")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
         {
@@ -39,6 +47,11 @@ namespace backend.Controllers.UserManagement
             }
         }
 
+        /// <summary>
+        /// Authenticates a user and issues a JWT token
+        /// </summary>
+        /// <param name="request">Login information</param>
+        /// <returns>JWT token or error message</returns>
         [HttpPost("SignIn", Name = "PostSignIn")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
@@ -65,6 +78,10 @@ namespace backend.Controllers.UserManagement
             }
         }
 
+        /// <summary>
+        /// Refreshes the JWT token
+        /// </summary>
+        /// <returns>New JWT token or error message</returns>
         [HttpPost("RefreshToken", Name = "PostRefreshToken")]
         public IActionResult RefreshToken()
         {

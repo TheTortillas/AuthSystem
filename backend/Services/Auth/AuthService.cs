@@ -1,3 +1,4 @@
+using backend.Constants;
 using backend.DTOs.Auth;
 using backend.DTOs.Users;
 using backend.Repositories.Interfaces;
@@ -18,7 +19,7 @@ namespace backend.Services.Auth
         }
 
         // Method to generate a salt
-        private string GenerateSalt(int size = 16)
+        private string GenerateSalt(int size = SecurityConstants.DefaultSaltSize)
         {
             var saltBytes = new byte[size];
             using (var rng = RandomNumberGenerator.Create())
@@ -59,7 +60,7 @@ namespace backend.Services.Auth
             }
 
             // Check if account is locked
-            if (user.FailedAttempts >= 5)
+            if (user.FailedAttempts >= SecurityConstants.MaxFailedAttempts)
             {
                 return (null, "Cuenta bloqueada por múltiples intentos fallidos. Contacte a soporte.", 423);
             }
@@ -73,7 +74,7 @@ namespace backend.Services.Auth
                 // Increment failed attempts counter
                 await _userRepository.IncrementFailedAttemptsAsync(user.Id);
 
-                int remainingAttempts = 5 - (user.FailedAttempts + 1);
+                int remainingAttempts = SecurityConstants.MaxFailedAttempts - (user.FailedAttempts + 1);
                 return (null, $"Contraseña incorrecta. Intentos restantes: {remainingAttempts}", 401);
             }
 
