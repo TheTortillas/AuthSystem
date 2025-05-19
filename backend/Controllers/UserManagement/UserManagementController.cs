@@ -2,6 +2,7 @@
 using backend.Services.Auth;
 using backend.Services.Email;
 using backend.Services.JWT;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,12 +18,14 @@ namespace backend.Controllers.UserManagement
         private readonly IAuthService _authService;
         private readonly jwtService _jwtService;
         private readonly IEmailService IEmailService;
+        private readonly IPasswordHasher<RegisterRequestDTO> _passwordHasher;
 
         public UserManagementController(IAuthService authService, jwtService jwtService, IEmailService emailService)
         {
-            IEmailService = emailService;
             _authService = authService;
             _jwtService = jwtService;
+            IEmailService = emailService;
+            _passwordHasher = new PasswordHasher<RegisterRequestDTO>();
         }
 
         /// <summary>
@@ -35,23 +38,37 @@ namespace backend.Controllers.UserManagement
         {
             try
             {
-                var success = await _authService.RegisterUserAsync(request);
-
-                if (!success)
+                // Validar la solicitud
+                if (!ModelState.IsValid)
                 {
-                    return BadRequest(new { message = "Error al registrar el usuario" });
+                    return BadRequest(ModelState);
                 }
 
-                // Envía email de verificación
-                var user = await _authService.GetUserByEmailAsync(request.Email);
-                if (user != null)
-                {
-                    var token = _jwtService.CreateEmailVerificationToken(user.Id, user.Email);
-                    var frontendUrl = Request.Headers["Origin"].ToString();
-                    await IEmailService.SendVerificationEmail(user.Email, token, frontendUrl);
-                }
+                // Generar hash y salt de la contraseña
+                var salt = _authService.GenerateSalt();
+                var saltedPassword = request.Password + salt;
+                var passwordHash = _passwordHasher.HashPassword(request, saltedPassword);
 
-                return Ok(new { message = "Usuario registrado exitosamente, revisa tu correo para verificar tu cuenta" });
+                // Crear un token que contenga todos los datos del usuario
+                var registrationToken = _jwtService.CreateRegistrationToken(
+                    request.Username,
+                    request.Email,
+                    request.GivenNames,
+                    request.PSurname,
+                    request.MSurname,
+                    request.PhoneNumber,
+                    passwordHash,
+                    salt
+                );
+
+                // Enviar correo de verificación
+                var frontendUrl = Request.Headers["Origin"].ToString();
+                await IEmailService.SendVerificationEmail(request.Email, registrationToken, frontendUrl);
+
+                return Ok(new
+                {
+                    message = "Se ha enviado un correo de verificación. Por favor, verifica tu correo para completar el registro."
+                });
             }
             catch (Exception ex)
             {

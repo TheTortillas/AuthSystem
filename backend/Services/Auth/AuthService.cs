@@ -19,7 +19,7 @@ namespace backend.Services.Auth
         }
 
         // Method to generate a salt
-        private string GenerateSalt(int size = SecurityConstants.DefaultSaltSize)
+        public string GenerateSalt(int size = SecurityConstants.DefaultSaltSize)
         {
             var saltBytes = new byte[size];
             using (var rng = RandomNumberGenerator.Create())
@@ -141,6 +141,15 @@ namespace backend.Services.Auth
             var passwordHash = _passwordHasher.HashPassword(new RegisterRequestDTO(), saltedPassword);
 
             return await _userRepository.ResetPasswordAsync(userId, passwordHash, salt);
+        }
+        public async Task<bool> RegisterVerifiedUserAsync(
+            string username, string email, string givenNames,
+            string pSurname, string mSurname, string phoneNumber,
+            string passwordHash, string passwordSalt)
+        {
+            return await _userRepository.RegisterVerifiedUserAsync(
+                username, email, givenNames, pSurname, mSurname,
+                phoneNumber, passwordHash, passwordSalt);
         }
     }
 }

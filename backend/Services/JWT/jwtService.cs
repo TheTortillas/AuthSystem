@@ -151,5 +151,41 @@ namespace backend.Services.JWT
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        public string CreateRegistrationToken(
+    string username,
+    string email,
+    string givenNames,
+    string pSurname,
+    string mSurname,
+    string phoneNumber,
+    string passwordHash,
+    string salt)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim("type", "Registration"),
+            new Claim("username", username),
+            new Claim("email", email),
+            new Claim("givenNames", givenNames),
+            new Claim("pSurname", pSurname),
+            new Claim("mSurname", mSurname ?? ""),
+            new Claim("phoneNumber", phoneNumber),
+            new Claim("passwordHash", passwordHash),
+            new Claim("passwordSalt", salt)
+        }),
+                Expires = DateTime.UtcNow.AddHours(24), // 24 horas para verificar
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _config["JWTSettings:validIssuer"],
+                Audience = _config["JWTSettings:validAudience"]
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

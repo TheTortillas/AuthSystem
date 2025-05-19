@@ -54,7 +54,7 @@ namespace backend.Controllers.Email
         {
             try
             {
-                // Validate token
+                // Validar token
                 var tokenHandler = new JwtSecurityTokenHandler();
                 if (!tokenHandler.CanReadToken(token))
                 {
@@ -63,23 +63,44 @@ namespace backend.Controllers.Email
 
                 var jwtToken = tokenHandler.ReadJwtToken(token);
 
-                // Extract claims
-                var userId = int.Parse(jwtToken.Claims.First(c => c.Type == "userId").Value);
-                var tokenType = jwtToken.Claims.First(c => c.Type == "type").Value;
+                // Extraer claims
+                var tokenType = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-                if (tokenType != "VerifyEmail")
+                if (tokenType != "Registration")
                 {
                     return BadRequest(new { message = "Tipo de token incorrecto" });
                 }
 
-                // Verify email in database
-                var success = await _authService.VerifyEmailAsync(userId);
-                if (!success)
+                // Extraer datos de usuario del token
+                var username = jwtToken.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
+                var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+                var givenNames = jwtToken.Claims.FirstOrDefault(c => c.Type == "givenNames")?.Value;
+                var pSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "pSurname")?.Value;
+                var mSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "mSurname")?.Value;
+                var phoneNumber = jwtToken.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
+                var passwordHash = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordHash")?.Value;
+                var passwordSalt = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordSalt")?.Value;
+
+                // Validar que todos los datos necesarios estén presentes
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
+                    string.IsNullOrEmpty(givenNames) || string.IsNullOrEmpty(pSurname) ||
+                    string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(passwordHash) ||
+                    string.IsNullOrEmpty(passwordSalt))
                 {
-                    return BadRequest(new { message = "No se pudo verificar el email" });
+                    return BadRequest(new { message = "Datos de registro incompletos en el token" });
                 }
 
-                return Ok(new { message = "Email verificado exitosamente" });
+                // Registrar al usuario con los datos del token
+                var success = await _authService.RegisterVerifiedUserAsync(
+                    username, email, givenNames, pSurname, mSurname,
+                    phoneNumber, passwordHash, passwordSalt);
+
+                if (!success)
+                {
+                    return BadRequest(new { message = "No se pudo completar el registro" });
+                }
+
+                return Ok(new { message = "Registro completado exitosamente. Ya puedes iniciar sesión." });
             }
             catch (Exception ex)
             {

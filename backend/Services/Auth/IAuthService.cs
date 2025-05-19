@@ -1,3 +1,4 @@
+using backend.Constants;
 using backend.DTOs.Auth;
 using backend.DTOs.Users;
 using Microsoft.AspNetCore.Mvc;
@@ -14,5 +15,10 @@ namespace backend.Services.Auth
         Task<bool> VerifyEmailAsync(int userId);
         Task<UserDTO?> GetUserByEmailAsync(string email);
         Task<bool> ResetPasswordAsync(int userId, string newPassword);
+        string GenerateSalt(int size = SecurityConstants.DefaultSaltSize);
+        Task<bool> RegisterVerifiedUserAsync(
+    string username, string email, string givenNames,
+    string pSurname, string mSurname, string phoneNumber,
+    string passwordHash, string passwordSalt);
     }
 }

@@ -11,5 +11,9 @@ namespace backend.Repositories.Interfaces
         Task<bool> UpdateLoginSuccessAsync(int userId);
         Task<bool> VerifyEmailAsync(int userId);
         Task<bool> ResetPasswordAsync(int userId, string passwordHash, string salt);
+        Task<bool> RegisterVerifiedUserAsync(
+    string username, string email, string givenNames,
+    string pSurname, string mSurname, string phoneNumber,
+    string passwordHash, string passwordSalt);
     }
 }

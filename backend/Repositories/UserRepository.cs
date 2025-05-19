@@ -319,5 +319,52 @@ namespace backend.Repositories
                 return false;
             }
         }
+
+        // Implementación del método
+        public async Task<bool> RegisterVerifiedUserAsync(
+            string username, string email, string givenNames,
+            string pSurname, string mSurname, string phoneNumber,
+            string passwordHash, string passwordSalt)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(_config.GetConnectionString("default")))
+                {
+                    MySqlCommand cmd = new MySqlCommand("sp_insert_user", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("p_username", username);
+                    cmd.Parameters.AddWithValue("p_email", email);
+                    cmd.Parameters.AddWithValue("p_given_names", givenNames);
+                    cmd.Parameters.AddWithValue("p_p_surname", pSurname);
+                    cmd.Parameters.AddWithValue("p_m_surname", mSurname);
+                    cmd.Parameters.AddWithValue("p_phone_number", phoneNumber);
+                    cmd.Parameters.AddWithValue("p_password_hash", passwordHash);
+                    cmd.Parameters.AddWithValue("p_password_salt", passwordSalt);
+
+                    MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    MySqlParameter messageParam = new MySqlParameter("p_message", MySqlDbType.VarChar, 255)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(statusParam);
+                    cmd.Parameters.Add(messageParam);
+
+                    await con.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
+
+                    int statusCode = (int)cmd.Parameters["p_status_code"].Value;
+                    return statusCode == 200;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
