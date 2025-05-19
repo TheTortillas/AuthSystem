@@ -122,5 +122,25 @@ namespace backend.Services.Auth
         {
             return await _userRepository.UpdateLoginSuccessAsync(userId);
         }
+
+        public async Task<bool> VerifyEmailAsync(int userId)
+        {
+            return await _userRepository.VerifyEmailAsync(userId);
+        }
+
+        public async Task<UserDTO?> GetUserByEmailAsync(string email)
+        {
+            return await _userRepository.GetUserByEmailAsync(email);
+        }
+
+        public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
+        {
+            // Generar nueva salt y hash para la nueva contraseña
+            var salt = GenerateSalt();
+            var saltedPassword = newPassword + salt;
+            var passwordHash = _passwordHasher.HashPassword(new RegisterRequestDTO(), saltedPassword);
+
+            return await _userRepository.ResetPasswordAsync(userId, passwordHash, salt);
+        }
     }
 }

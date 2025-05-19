@@ -106,5 +106,50 @@ namespace backend.Services.JWT
                 throw new SecurityTokenException("Token inválido o expirado.");
             }
         }
+
+        public string CreateEmailVerificationToken(int userId, string userEmail)
+        {
+            // Reutiliza la lógica de CreateToken, pero con claims mínimos y tiempo corto
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("type", "VerifyEmail"),
+                    new Claim("userId", userId.ToString()),
+                    new Claim("email", userEmail)
+                }),
+                Expires = DateTime.UtcNow.AddHours(24),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _config["JWTSettings:validIssuer"],
+                Audience = _config["JWTSettings:validAudience"]
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        public string CreatePasswordResetToken(int userId, string userEmail)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim("type", "ResetPassword"),
+            new Claim("userId", userId.ToString()),
+            new Claim("email", userEmail)
+        }),
+                Expires = DateTime.UtcNow.AddHours(1), // Menos tiempo para seguridad
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _config["JWTSettings:validIssuer"],
+                Audience = _config["JWTSettings:validAudience"]
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

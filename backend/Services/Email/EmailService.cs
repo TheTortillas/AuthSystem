@@ -45,5 +45,41 @@ namespace backend.Services.Email
 
             await smptClient.SendMailAsync(message);
         }
+
+        public async Task SendVerificationEmail(string email, string token, string frontendUrl)
+        {
+            string verificationLink = $"{frontendUrl}/verify-email?token={token}";
+            string subject = "Verifica tu cuenta en AuthSystem";
+            string body = $@"
+            <html>
+            <body>
+                <h2>Verificación de cuenta</h2>
+                <p>Gracias por registrarte. Por favor haz clic en el siguiente enlace para verificar tu cuenta:</p>
+                <p><a href='{verificationLink}'>Verificar mi cuenta</a></p>
+                <p>Este enlace expirará en 24 horas.</p>
+                <p>Si no solicitaste esta verificación, puedes ignorar este correo.</p>
+            </body>
+            </html>";
+
+            await SendEmail(email, subject, body);
+        }
+
+        public async Task SendPasswordResetEmail(string email, string token, string frontendUrl)
+        {
+            string resetLink = $"{frontendUrl}/reset-password?token={token}";
+            string subject = "Restablecimiento de contraseña en AuthSystem";
+            string body = $@"
+            <html>
+            <body>
+                <h2>Restablecimiento de contraseña</h2>
+                <p>Has solicitado restablecer tu contraseña. Por favor haz clic en el siguiente enlace para hacerlo:</p>
+                <p><a href='{resetLink}'>Restablecer mi contraseña</a></p>
+                <p>Este enlace expirará en 1 hora.</p>
+                <p>Si no solicitaste este restablecimiento, puedes ignorar este correo.</p>
+            </body>
+            </html>";
+
+            await SendEmail(email, subject, body);
+        }
     }
 }

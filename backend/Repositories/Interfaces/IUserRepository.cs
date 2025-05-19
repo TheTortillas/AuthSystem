@@ -9,5 +9,7 @@ namespace backend.Repositories.Interfaces
         Task<UserDTO?> GetUserByUsernameAsync(string username);
         Task<bool> IncrementFailedAttemptsAsync(int userId);
         Task<bool> UpdateLoginSuccessAsync(int userId);
+        Task<bool> VerifyEmailAsync(int userId);
+        Task<bool> ResetPasswordAsync(int userId, string passwordHash, string salt);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using backend.DTOs.Auth;
 using backend.Services.Auth;
+using backend.Services.Email;
 using backend.Services.JWT;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -15,9 +16,11 @@ namespace backend.Controllers.UserManagement
     {
         private readonly IAuthService _authService;
         private readonly jwtService _jwtService;
+        private readonly IEmailService IEmailService;
 
-        public UserManagementController(IAuthService authService, jwtService jwtService)
+        public UserManagementController(IAuthService authService, jwtService jwtService, IEmailService emailService)
         {
+            IEmailService = emailService;
             _authService = authService;
             _jwtService = jwtService;
         }
@@ -39,7 +42,16 @@ namespace backend.Controllers.UserManagement
                     return BadRequest(new { message = "Error al registrar el usuario" });
                 }
 
-                return Ok(new { message = "Usuario registrado exitosamente" });
+                // Envía email de verificación
+                var user = await _authService.GetUserByEmailAsync(request.Email);
+                if (user != null)
+                {
+                    var token = _jwtService.CreateEmailVerificationToken(user.Id, user.Email);
+                    var frontendUrl = Request.Headers["Origin"].ToString();
+                    await IEmailService.SendVerificationEmail(user.Email, token, frontendUrl);
+                }
+
+                return Ok(new { message = "Usuario registrado exitosamente, revisa tu correo para verificar tu cuenta" });
             }
             catch (Exception ex)
             {

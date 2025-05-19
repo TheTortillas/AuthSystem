@@ -246,5 +246,78 @@ namespace backend.Repositories
                 return null;
             }
         }
+        public async Task<bool> VerifyEmailAsync(int userId)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(_config.GetConnectionString("default")))
+                {
+                    MySqlCommand cmd = new MySqlCommand("sp_verify_email", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("p_user_id", userId);
+
+                    MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    MySqlParameter messageParam = new MySqlParameter("p_message", MySqlDbType.VarChar, 255)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(statusParam);
+                    cmd.Parameters.Add(messageParam);
+
+                    await con.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
+
+                    int statusCode = (int)cmd.Parameters["p_status_code"].Value;
+                    return statusCode == 200;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ResetPasswordAsync(int userId, string passwordHash, string salt)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(_config.GetConnectionString("default")))
+                {
+                    MySqlCommand cmd = new MySqlCommand("sp_reset_password", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("p_user_id", userId);
+                    cmd.Parameters.AddWithValue("p_new_password_hash", passwordHash);
+                    cmd.Parameters.AddWithValue("p_new_password_salt", salt);
+
+                    MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    MySqlParameter messageParam = new MySqlParameter("p_message", MySqlDbType.VarChar, 255)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(statusParam);
+                    cmd.Parameters.Add(messageParam);
+
+                    await con.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
+
+                    int statusCode = (int)cmd.Parameters["p_status_code"].Value;
+                    return statusCode == 200;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

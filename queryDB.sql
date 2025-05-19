@@ -16,7 +16,6 @@ CREATE TABLE users (
     failed_attempts INT DEFAULT 0
 );
 
-
 DELIMITER $$
 -- Procedimiento para insertar un nuevo usuario
 CREATE PROCEDURE sp_insert_user(
@@ -145,6 +144,7 @@ BEGIN
     
     COMMIT;
 END$$
+
 DELIMITER $$
 -- Procedimiento para obtener un usuario por username
 CREATE PROCEDURE sp_get_user_by_username(
@@ -180,6 +180,83 @@ BEGIN
         
         SET p_status_code = 200;
         SET p_message = 'Usuario obtenido exitosamente.';
+    END IF;
+    
+    COMMIT;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+-- Procedimiento para verificar email
+CREATE PROCEDURE sp_verify_email(
+    IN p_user_id INT,
+    OUT p_status_code INT,
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE user_exists INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_status_code = 500;
+        SET p_message = 'Error: No se pudo verificar el email.';
+    END;
+
+    START TRANSACTION;
+    
+    -- Check if user exists
+    SELECT COUNT(*) INTO user_exists FROM users WHERE id = p_user_id;
+    
+    IF user_exists = 0 THEN
+        SET p_status_code = 404;
+        SET p_message = 'Error: Usuario no encontrado.';
+    ELSE
+        UPDATE users SET email_verified = TRUE WHERE id = p_user_id;
+        
+        SET p_status_code = 200;
+        SET p_message = 'Email verificado exitosamente.';
+    END IF;
+    
+    COMMIT;
+END$$
+
+DELIMITER $$
+-- Procedimiento para cambiar contraseña
+CREATE PROCEDURE sp_reset_password(
+    IN p_user_id INT,
+    IN p_new_password_hash VARCHAR(255),
+    IN p_new_password_salt VARCHAR(255),
+    OUT p_status_code INT,
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE user_exists INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_status_code = 500;
+        SET p_message = 'Error: No se pudo cambiar la contraseña.';
+    END;
+
+    START TRANSACTION;
+    
+    -- Check if user exists
+    SELECT COUNT(*) INTO user_exists FROM users WHERE id = p_user_id;
+    
+    IF user_exists = 0 THEN
+        SET p_status_code = 404;
+        SET p_message = 'Error: Usuario no encontrado.';
+    ELSE
+        UPDATE users 
+        SET password_hash = p_new_password_hash, 
+            password_salt = p_new_password_salt,
+            failed_attempts = 0
+        WHERE id = p_user_id;
+        
+        SET p_status_code = 200;
+        SET p_message = 'Contraseña cambiada exitosamente.';
     END IF;
     
     COMMIT;

@@ -11,5 +11,8 @@ namespace backend.Services.Auth
         Task<(UserDTO? User, string? ErrorMessage, int StatusCode)> AuthenticateByUsernameAsync(UsernameLoginRequestDTO request);
         Task<bool> IncrementFailedAttemptsAsync(int userId);
         Task<bool> UpdateLoginSuccessAsync(int userId);
+        Task<bool> VerifyEmailAsync(int userId);
+        Task<UserDTO?> GetUserByEmailAsync(string email);
+        Task<bool> ResetPasswordAsync(int userId, string newPassword);
     }
 }
