@@ -62,6 +62,15 @@ namespace backend.Controllers.Email
                 }
 
                 var jwtToken = tokenHandler.ReadJwtToken(token);
+                var expiry = jwtToken.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+                if (expiry != null)
+                {
+                    var expiryTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry));
+                    if (expiryTime < DateTimeOffset.UtcNow)
+                    {
+                        return BadRequest(new { message = "El enlace de verificación ha expirado. Por favor, solicita uno nuevo." });
+                    }
+                }
 
                 // Extraer claims
                 var tokenType = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;

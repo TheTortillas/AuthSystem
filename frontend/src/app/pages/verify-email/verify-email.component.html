@@ -1,0 +1,140 @@
+<div
+  class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900">
+        Verificación de Email
+      </h2>
+    </div>
+
+    <!-- Estado de carga - Corregido para mostrar solo cuando isVerifying es true -->
+    <div *ngIf="isVerifying" class="text-center p-8">
+      <div
+        class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+        role="status"
+      >
+        <span
+          class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+        >
+          Cargando...
+        </span>
+      </div>
+      <p class="mt-4 text-lg text-gray-600">
+        Verificando tu correo electrónico...
+      </p>
+    </div>
+
+    <!-- Estado de éxito -->
+    <div *ngIf="!isVerifying && verificationSuccess" class="text-center p-8">
+      <div
+        class="inline-flex h-24 w-24 items-center justify-center rounded-full bg-green-100 success-checkmark"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-12 w-12 text-green-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </div>
+
+      <h3 class="mt-6 text-xl font-medium text-gray-900">
+        ¡Verificación completada!
+      </h3>
+      <p class="mt-2 text-gray-600">
+        Tu cuenta ha sido verificada correctamente.
+      </p>
+
+      <div class="mt-8">
+        <a
+          [routerLink]="['/auth/sign-in']"
+          class="text-center w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+        >
+          Iniciar sesión
+        </a>
+      </div>
+    </div>
+
+    <!-- Estado de error con diferentes mensajes según el tipo -->
+    <div *ngIf="showErrorState" class="text-center p-8">
+      <div
+        class="inline-flex h-24 w-24 items-center justify-center rounded-full bg-red-100"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-12 w-12 text-red-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </div>
+
+      <h3 class="mt-6 text-xl font-medium text-gray-900">
+        {{
+          specificErrorType === "expired"
+            ? "Enlace Expirado"
+            : specificErrorType === "invalid"
+            ? "Token Inválido"
+            : "Error de Verificación"
+        }}
+      </h3>
+
+      <p class="mt-2 text-gray-600">{{ errorMessage }}</p>
+
+      <div class="mt-8 flex flex-col space-y-4">
+        <!-- Botones específicos según el tipo de error -->
+        <ng-container [ngSwitch]="specificErrorType">
+          <ng-container *ngSwitchCase="'expired'">
+            <a
+              [routerLink]="['/auth/resend-verification']"
+              class="text-center w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Solicitar nuevo enlace
+            </a>
+            <a
+              [routerLink]="['/']"
+              class="text-center w-full inline-flex items-center justify-center px-5 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100"
+            >
+              Volver al inicio
+            </a>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'invalid'">
+            <a
+              [routerLink]="['/auth/sign-up']"
+              class="text-center w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Volver al registro
+            </a>
+          </ng-container>
+
+          <!-- Se eliminó el caso 'network' -->
+
+          <ng-container *ngSwitchDefault>
+            <a
+              [routerLink]="['/auth/sign-up']"
+              class="text-center w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Volver al registro
+            </a>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
