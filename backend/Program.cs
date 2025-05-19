@@ -2,6 +2,7 @@
 using backend.Repositories;
 using backend.Repositories.Interfaces;
 using backend.Services.Auth;
+using backend.Services.Email;
 using backend.Services.JWT;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +51,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IPasswordHasher<RegisterRequestDTO>, PasswordHasher<RegisterRequestDTO>>();
 builder.Services.AddSingleton<jwtService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 // Configuracion de JWT
 builder.Services.AddAuthentication(options =>

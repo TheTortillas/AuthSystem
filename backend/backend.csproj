@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>15620624-c0ad-4504-ba0e-045808d8174c</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,10 @@
     <PackageReference Include="MySql.Data" Version="9.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\NewFolder\" />
   </ItemGroup>
 
 </Project>
