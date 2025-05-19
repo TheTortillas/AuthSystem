@@ -1,6 +1,6 @@
 ﻿using backend.DTOs.Auth;
-using backend.Repositories;
 using backend.Repositories.Interfaces;
+using backend.Repositories.User;
 using backend.Services.Auth;
 using backend.Services.Email;
 using backend.Services.JWT;

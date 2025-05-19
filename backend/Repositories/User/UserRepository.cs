@@ -3,7 +3,7 @@ using backend.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System.Data;
 
-namespace backend.Repositories
+namespace backend.Repositories.User
 {
     public class UserRepository : IUserRepository
     {
@@ -98,7 +98,7 @@ namespace backend.Repositories
                                 Password = reader.GetString("password_hash"),
                                 Salt = reader.GetString("password_salt"),
                                 CreatedAt = reader.GetDateTime("created_at"),
-                                LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? (DateTime?)null : reader.GetDateTime("last_login"),
+                                LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
                                 // Default to 0 if column doesn't exist
                                 FailedAttempts = 0
                             };
@@ -213,7 +213,7 @@ namespace backend.Repositories
                                 Password = reader.GetString("password_hash"),
                                 Salt = reader.GetString("password_salt"),
                                 CreatedAt = reader.GetDateTime("created_at"),
-                                LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? (DateTime?)null : reader.GetDateTime("last_login"),
+                                LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
                                 FailedAttempts = 0
                             };
 
