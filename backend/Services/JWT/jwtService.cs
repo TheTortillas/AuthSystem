@@ -153,14 +153,14 @@ namespace backend.Services.JWT
         }
 
         public string CreateRegistrationToken(
-    string username,
-    string email,
-    string givenNames,
-    string pSurname,
-    string mSurname,
-    string phoneNumber,
-    string passwordHash,
-    string salt)
+            string username,
+            string email,
+            string givenNames,
+            string pSurname,
+            string mSurname,
+            string phoneNumber,
+            string passwordHash,
+            string salt)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);

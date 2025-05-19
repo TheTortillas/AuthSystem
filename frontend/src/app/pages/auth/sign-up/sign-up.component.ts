@@ -6,7 +6,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
+import {
+  UserManagementService,
+  RegisterRequest,
+} from '../../../core/services/user-management.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-sign-up',
@@ -21,7 +26,11 @@ export class SignUpComponent {
   passwordVisible = false;
   confirmPasswordVisible = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private userManagementService: UserManagementService,
+    private router: Router
+  ) {
     this.signupForm = this.fb.group(
       {
         username: ['', [Validators.required, Validators.minLength(3)]],
@@ -63,13 +72,65 @@ export class SignUpComponent {
   onSubmit() {
     if (this.signupForm.valid) {
       this.isSubmitting = true;
-      // Here you would call your authentication service
-      console.log('Form submitted', this.signupForm.value);
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting = false;
-      }, 1500);
+
+      // Extraer datos del formulario
+      const formData = this.signupForm.value;
+
+      // Crear objeto para enviar al backend
+      const registerData: RegisterRequest = {
+        username: formData.username,
+        email: formData.email,
+        givenNames: formData.givenNames,
+        pSurname: formData.pSurname,
+        mSurname: formData.mSurname || '',
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+      };
+
+      // Llamar al servicio
+      this.userManagementService.signUp(registerData).subscribe({
+        next: (response) => {
+          this.isSubmitting = false;
+
+          // Mostrar notificación de éxito con Swal
+          Swal.fire({
+            title: '¡Registro Exitoso!',
+            text: response.message,
+            icon: 'success',
+            confirmButtonText: 'Continuar',
+            confirmButtonColor: '#3B82F6',
+          }).then((result) => {
+            // Cuando el usuario cierra la alerta, redirigir a sign-in
+            if (result.isConfirmed) {
+              this.router.navigate(['/auth/sign-in']);
+            }
+          });
+        },
+        error: (error) => {
+          this.isSubmitting = false;
+
+          // Mostrar notificación de error con Swal
+          Swal.fire({
+            title: '¡Error!',
+            text: error.error?.message || 'Error al registrar usuario',
+            icon: 'error',
+            confirmButtonText: 'Intentar nuevamente',
+            confirmButtonColor: '#3B82F6',
+          });
+
+          console.error('Error en registro:', error);
+        },
+      });
     } else {
+      // Mostrar mensaje si el formulario es inválido
+      Swal.fire({
+        title: 'Datos Incompletos',
+        text: 'Por favor completa correctamente todos los campos requeridos.',
+        icon: 'warning',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#3B82F6',
+      });
+
       this.signupForm.markAllAsTouched();
     }
   }

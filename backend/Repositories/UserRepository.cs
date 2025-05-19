@@ -320,7 +320,6 @@ namespace backend.Repositories
             }
         }
 
-        // Implementación del método
         public async Task<bool> RegisterVerifiedUserAsync(
             string username, string email, string givenNames,
             string pSurname, string mSurname, string phoneNumber,
