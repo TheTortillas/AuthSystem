@@ -85,14 +85,14 @@ export class SignInComponent {
             this.loginError = error.error?.message || 'Error al iniciar sesión';
           }
 
-          // También mostramos un toast de error para mejor UX
-          Swal.fire({
-            title: 'Error',
-            text: this.loginError,
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#3B82F6',
-          });
+          // // También mostramos un toast de error para mejor UX
+          // Swal.fire({
+          //   title: 'Error',
+          //   text: this.loginError,
+          //   icon: 'error',
+          //   confirmButtonText: 'Entendido',
+          //   confirmButtonColor: '#3B82F6',
+          // });
         },
       });
     } else {

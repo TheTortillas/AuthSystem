@@ -6,6 +6,7 @@ import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-pas
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
 import { AuthGuard } from './core/guards/auth-guard.guard';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
   {
     path: 'verify-email',
     component: VerifyEmailComponent,
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent,
   },
   {
     path: 'dashboard',

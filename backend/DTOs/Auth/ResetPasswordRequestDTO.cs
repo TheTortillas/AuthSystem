@@ -10,9 +10,5 @@ namespace backend.DTOs.Auth
         [Required]
         [MinLength(6)]
         public string NewPassword { get; set; } = string.Empty;
-
-        [Required]
-        [Compare("NewPassword", ErrorMessage = "Las contraseñas no coinciden")]
-        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

@@ -17,8 +17,8 @@ namespace backend.Services.Auth
         Task<bool> ResetPasswordAsync(int userId, string newPassword);
         string GenerateSalt(int size = SecurityConstants.DefaultSaltSize);
         Task<bool> RegisterVerifiedUserAsync(
-    string username, string email, string givenNames,
-    string pSurname, string mSurname, string phoneNumber,
-    string passwordHash, string passwordSalt);
-    }
+            string username, string email, string givenNames,
+            string pSurname, string mSurname, string phoneNumber,
+            string passwordHash, string passwordSalt);
+        }
 }

@@ -30,8 +30,8 @@ namespace backend.Controllers.UserManagement
                 var user = await _authService.GetUserByEmailAsync(request.Email);
                 if (user == null)
                 {
-                    // For security, don't reveal if email exists or not
-                    return Ok(new { message = "Si el correo existe, recibirás un enlace para restablecer tu contraseña" });
+                    // For security, don't reveal if email exists or not IDK
+                    return BadRequest(new { message = "Este correo no está registrado" });
                 }
 
                 // Generate password reset token (create this method in JWT service)
@@ -41,7 +41,7 @@ namespace backend.Controllers.UserManagement
                 var frontendUrl = Request.Headers["Origin"].ToString();
                 await _emailService.SendPasswordResetEmail(user.Email, token, frontendUrl);
 
-                return Ok(new { message = "Si el correo existe, recibirás un enlace para restablecer tu contraseña" });
+                return Ok(new { message = "Recibirás un enlace para restablecer tu contraseña" });
             }
             catch (Exception ex)
             {
@@ -98,6 +98,5 @@ namespace backend.Controllers.UserManagement
                 return StatusCode(500, new { message = $"Error interno: {ex.Message}" });
             }
         }
-
     }
 }

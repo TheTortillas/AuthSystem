@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { EmailManagementService } from '../../../core/services/email-management.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -21,7 +22,10 @@ export class ForgotPasswordComponent {
   requestSent = false;
   errorMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private emailService: EmailManagementService
+  ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
     });
@@ -32,16 +36,20 @@ export class ForgotPasswordComponent {
       this.isSubmitting = true;
       this.errorMessage = '';
 
-      // Here you would call your password reset service
-      console.log('Reset requested for', this.forgotPasswordForm.value.email);
+      const email = this.forgotPasswordForm.value.email;
 
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting = false;
-        this.requestSent = true;
-        // For demo purposes, you might show an error
-        // this.errorMessage = 'Email not found in our records.';
-      }, 1500);
+      this.emailService.requestPasswordReset(email).subscribe({
+        next: (response) => {
+          this.isSubmitting = false;
+          this.requestSent = true;
+        },
+        error: (error) => {
+          this.isSubmitting = false;
+          this.errorMessage =
+            error.error.message ||
+            'Error al solicitar restablecimiento de contraseña';
+        },
+      });
     } else {
       this.forgotPasswordForm.markAllAsTouched();
     }
