@@ -3,6 +3,9 @@ import { AuthComponent } from './pages/auth/auth.component';
 import { SignInComponent } from './pages/auth/sign-in/sign-in.component';
 import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
+import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
+import { AuthGuard } from './core/guards/auth-guard.guard';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +35,15 @@ export const routes: Routes = [
         component: ForgotPasswordComponent,
       },
     ],
+  },
+  {
+    path: 'verify-email',
+    component: VerifyEmailComponent,
+  },
+  {
+    path: 'dashboard',
+    canActivate: [AuthGuard],
+    component: DashboardComponent,
   },
   {
     path: '**',

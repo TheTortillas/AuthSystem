@@ -1,0 +1,61 @@
+<div class="p-6">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Header with logout button -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Dashboard</h1>
+      <button
+        (click)="logout()"
+        class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm11 4a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L14 11.586V7z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Cerrar Sesión
+      </button>
+    </div>
+
+    <div class="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-md">
+      <h2 class="text-lg font-semibold mb-2">Información de Usuario</h2>
+      <div *ngIf="username" class="mb-2">
+        <span class="font-medium">Usuario:</span> {{ username }}
+      </div>
+      <div *ngIf="userEmail" class="mb-2">
+        <span class="font-medium">Email:</span> {{ userEmail }}
+      </div>
+    </div>
+
+    <!-- Rest of your dashboard content remains unchanged -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Sample dashboard cards -->
+      <div
+        class="bg-blue-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-blue-800 mb-2">Funcionalidad 1</h3>
+        <p>Descripción de la funcionalidad.</p>
+      </div>
+
+      <div
+        class="bg-green-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-green-800 mb-2">Funcionalidad 2</h3>
+        <p>Descripción de la funcionalidad.</p>
+      </div>
+
+      <div
+        class="bg-purple-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+      >
+        <h3 class="font-semibold text-purple-800 mb-2">Funcionalidad 3</h3>
+        <p>Descripción de la funcionalidad.</p>
+      </div>
+    </div>
+  </div>
+</div>
