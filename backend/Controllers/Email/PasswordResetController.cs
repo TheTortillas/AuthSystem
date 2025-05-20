@@ -49,30 +49,42 @@ namespace backend.Controllers.UserManagement
             }
         }
 
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
         {
             try
             {
-                // Validate token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                if (!tokenHandler.CanReadToken(request.Token))
+                // Validar token  
+                var (jwtToken, errorMessage) = _jwtService.ValidateToken(request.Token);
+
+                // Verificar si es valido  
+                if (jwtToken == null)
                 {
-                    return BadRequest(new { message = "Token inválido" });
+                    return BadRequest(new { message = errorMessage ?? "Error al válidar el token" });
                 }
 
-                var jwtToken = tokenHandler.ReadJwtToken(request.Token);
-
-                // Extract claims
-                var userId = int.Parse(jwtToken.Claims.First(c => c.Type == "userId").Value);
-                var tokenType = jwtToken.Claims.First(c => c.Type == "type").Value;
-
-                if (tokenType != "ResetPassword")
+                // Verificar tipo de token  
+                var tokenTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+                if (tokenTypeClaim != "ResetPassword")
                 {
                     return BadRequest(new { message = "Tipo de token incorrecto" });
                 }
 
-                // Reset password in database
+                var expiry = jwtToken.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+                if (expiry != null)
+                {
+                    var expiryTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry));
+                    if (expiryTime < DateTimeOffset.UtcNow)
+                    {
+                        return BadRequest(new { message = "El enlace de verificación ha expirado. Por favor, solicita uno nuevo." });
+                    }
+                }
+
+                // Extract claims  
+                var userId = int.Parse(jwtToken.Claims.First(c => c.Type == "userId").Value);
+
+                // Reset password in database  
                 var success = await _authService.ResetPasswordAsync(userId, request.NewPassword);
                 if (!success)
                 {
@@ -86,5 +98,6 @@ namespace backend.Controllers.UserManagement
                 return StatusCode(500, new { message = $"Error interno: {ex.Message}" });
             }
         }
+
     }
 }

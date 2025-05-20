@@ -1,6 +1,7 @@
 ﻿using backend.DTOs.Users;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 using System.Text;
 
@@ -52,7 +53,6 @@ namespace backend.Services.JWT
 
         public string RefreshToken(string token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
             var securityKey = _config["JWTSettings:securityKey"];
 
             if (string.IsNullOrEmpty(securityKey))
@@ -60,51 +60,39 @@ namespace backend.Services.JWT
                 throw new ArgumentNullException(nameof(securityKey), "La clave de seguridad no puede ser nula o vacía.");
             }
 
-            var key = Encoding.UTF8.GetBytes(securityKey);
+            // Usar el método ValidateToken
+            var (jwtToken, errorMessage) = ValidateToken(token);
 
-            try
+            if (jwtToken == null)
             {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = _config["JWTSettings:validIssuer"],
-                    ValidAudience = _config["JWTSettings:validAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ClockSkew = TimeSpan.Zero // Evita márgenes de tiempo  
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var id = jwtToken.Claims.First(x => x.Type == "id").Value;
-                var username = jwtToken.Claims.First(x => x.Type == "username").Value;
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-                var givenNames = jwtToken.Claims.First(x => x.Type == "givennames").Value;
-                var pSurname = jwtToken.Claims.First(x => x.Type == "psurname").Value;
-                var mSurname = jwtToken.Claims.First(x => x.Type == "msurname").Value;
-                var phoneNumber = jwtToken.Claims.First(x => x.Type == "phonenumber").Value;
-                var createdAtStr = jwtToken.Claims.First(x => x.Type == "createdat").Value;
-                var lastLoginStr = jwtToken.Claims.First(x => x.Type == "lastlogin").Value;
-
-                var user = new UserDTO
-                {
-                    Id = int.Parse(id),
-                    Username = username,
-                    Email = email,
-                    GivenNames = givenNames,
-                    PSurname = pSurname,
-                    MSurname = string.IsNullOrEmpty(mSurname) ? null : mSurname,
-                    PhoneNumber = phoneNumber,
-                    CreatedAt = DateTime.Parse(createdAtStr),
-                    LastLogin = string.IsNullOrEmpty(lastLoginStr) ? null : DateTime.Parse(lastLoginStr)
-                };
-
-                return CreateToken(user);
+                throw new SecurityTokenException( errorMessage );
             }
-            catch
+
+            // Extraer claims
+            var id = jwtToken.Claims.First(x => x.Type == "id").Value;
+            var username = jwtToken.Claims.First(x => x.Type == "username").Value;
+            var email = jwtToken.Claims.First(x => x.Type == "email").Value;
+            var givenNames = jwtToken.Claims.First(x => x.Type == "givennames").Value;
+            var pSurname = jwtToken.Claims.First(x => x.Type == "psurname").Value;
+            var mSurname = jwtToken.Claims.First(x => x.Type == "msurname").Value;
+            var phoneNumber = jwtToken.Claims.First(x => x.Type == "phonenumber").Value;
+            var createdAtStr = jwtToken.Claims.First(x => x.Type == "createdat").Value;
+            var lastLoginStr = jwtToken.Claims.First(x => x.Type == "lastlogin").Value;
+
+            var user = new UserDTO
             {
-                throw new SecurityTokenException("Token inválido o expirado.");
-            }
+                Id = int.Parse(id),
+                Username = username,
+                Email = email,
+                GivenNames = givenNames,
+                PSurname = pSurname,
+                MSurname = string.IsNullOrEmpty(mSurname) ? null : mSurname,
+                PhoneNumber = phoneNumber,
+                CreatedAt = DateTime.Parse(createdAtStr),
+                LastLogin = string.IsNullOrEmpty(lastLoginStr) ? null : DateTime.Parse(lastLoginStr)
+            };
+
+            return CreateToken(user);
         }
 
         public string CreateEmailVerificationToken(int userId, string userEmail)
@@ -186,6 +174,46 @@ namespace backend.Services.JWT
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public (JwtSecurityToken? token, string errorMessage) ValidateToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                // No hay token  
+                if (!tokenHandler.CanReadToken(token) || token == null)
+                    return (null, "Token vacío");
+
+                var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);
+
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _config["JWTSettings:validIssuer"],
+                    ValidAudience = _config["JWTSettings:validAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                return ((JwtSecurityToken)validatedToken, string.Empty);
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                return (null, "Token expirado");
+            }
+            catch (SecurityTokenInvalidSignatureException)
+            {
+                return (null, "Firma del token inválida");
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Error de validación: {ex.Message}");
+            }
         }
     }
 }

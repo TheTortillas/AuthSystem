@@ -54,14 +54,22 @@ namespace backend.Controllers.Email
         {
             try
             {
-                // Validar token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                if (!tokenHandler.CanReadToken(token))
+                // Validar token  
+                var (jwtToken, errorMessage) = _jwtService.ValidateToken(token);
+
+                // Verificar si es valido  
+                if (jwtToken == null)
                 {
-                    return BadRequest(new { message = "Token inválido" });
+                    return BadRequest(new { message = errorMessage ?? "Error al válidar el token" });
                 }
 
-                var jwtToken = tokenHandler.ReadJwtToken(token);
+                // Verificar tipo de token  
+                var tokenType = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+                if (tokenType != "Registration")
+                {
+                    return BadRequest(new { message = "Tipo de token incorrecto" });
+                }
+
                 var expiry = jwtToken.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
                 if (expiry != null)
                 {
@@ -72,15 +80,7 @@ namespace backend.Controllers.Email
                     }
                 }
 
-                // Extraer claims
-                var tokenType = jwtToken.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-                if (tokenType != "Registration")
-                {
-                    return BadRequest(new { message = "Tipo de token incorrecto" });
-                }
-
-                // Extraer datos de usuario del token
+                // Extraer datos de usuario del token  
                 var username = jwtToken.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
                 var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
                 var givenNames = jwtToken.Claims.FirstOrDefault(c => c.Type == "givenNames")?.Value;
@@ -90,7 +90,7 @@ namespace backend.Controllers.Email
                 var passwordHash = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordHash")?.Value;
                 var passwordSalt = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordSalt")?.Value;
 
-                // Validar que todos los datos necesarios estén presentes
+                // Validar que todos los datos necesarios estén presentes  
                 if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
                     string.IsNullOrEmpty(givenNames) || string.IsNullOrEmpty(pSurname) ||
                     string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(passwordHash) ||
@@ -99,7 +99,7 @@ namespace backend.Controllers.Email
                     return BadRequest(new { message = "Datos de registro incompletos en el token" });
                 }
 
-                // Registrar al usuario con los datos del token
+                // Registrar al usuario con los datos del token  
                 var success = await _authService.RegisterVerifiedUserAsync(
                     username, email, givenNames, pSurname, mSurname,
                     phoneNumber, passwordHash, passwordSalt);

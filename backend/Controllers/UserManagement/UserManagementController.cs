@@ -137,7 +137,6 @@ namespace backend.Controllers.UserManagement
                 return StatusCode(500, new { message = $"Error interno del servidor: {ex.Message}" });
             }
         }
-
         /// <summary>
         /// Refreshes the JWT token
         /// </summary>
@@ -160,8 +159,21 @@ namespace backend.Controllers.UserManagement
             }
             catch (SecurityTokenException ex)
             {
-                Console.WriteLine($"Error al validar el token: {ex.Message}");
-                return Unauthorized(new { message = "Token inválido o expirado." });
+                if (ex.Message.Contains("expirado"))
+                {
+                    // 401 para tokens expirados
+                    return Unauthorized(new { message = ex.Message });
+                }
+                else if (ex.Message.Contains("inválida"))
+                {
+                    // 403 para tokens con firma inválida (posible manipulación)
+                    return StatusCode(403, new { message = ex.Message });
+                }
+                else
+                {
+                    // 401 para otros errores
+                    return Unauthorized(new { message = ex.Message });
+                }
             }
         }
     }
