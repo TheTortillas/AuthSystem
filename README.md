@@ -1,5 +1,18 @@
 # AuthSystem - Sistema de Autenticación
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TheTortillas/AuthSystem)
+
+<!--deepwiki-title: AuthSystem-->
+<!--deepwiki-description: Sistema de autenticación robusto con Angular 18, .NET 8, MySQL, JWT y hashing de contraseñas seguro (PBKDF2 + SHA512 + salt embebida). Incluye verificación de email, recuperación de contraseñas, protección contra fuerza bruta y arquitectura moderna. -->
+<!--deepwiki-stack: Angular, .NET 8, C#, MySQL, JWT, PBKDF2, SHA512, TailwindCSS-->
+<!--deepwiki-keywords: autenticación, hashing de contraseñas, salt embebida, PBKDF2, SHA512, JWT, verificación de email, fuerza bruta, seguridad, Angular, .NET, MySQL-->
+<!--deepwiki-main: backend/Services/Auth/PasswordHasher.cs-->
+<!--deepwiki-main: backend/Controllers/UserManagement/UserManagementController.cs-->
+<!--deepwiki-main: backend/Services/Auth/AuthService.cs-->
+<!--deepwiki-main: queryDB.sql-->
+<!--deepwiki-main: frontend/src/app/core/-->
+<!--deepwiki-main: frontend/src/app/pages/-->
+
 Un sistema completo de autenticación desarrollado con Angular 18 (frontend) y .NET 8 (backend), con características de seguridad robustas como verificación de email, recuperación de contraseñas, y protección contra ataques.
 
 ## 📋 Tabla de Contenido
