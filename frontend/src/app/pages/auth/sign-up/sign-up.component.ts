@@ -5,6 +5,8 @@ import {
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import {
@@ -25,6 +27,7 @@ export class SignUpComponent {
   isSubmitting = false;
   passwordVisible = false;
   confirmPasswordVisible = false;
+  passwordStrength = '';
 
   constructor(
     private fb: FormBuilder,
@@ -42,11 +45,92 @@ export class SignUpComponent {
           '',
           [Validators.required, Validators.pattern('^[0-9]{10,15}$')],
         ],
-        password: ['', [Validators.required, Validators.minLength(8)]],
+        password: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(12),
+            this.uppercaseValidator,
+            this.lowercaseValidator,
+            this.numberValidator,
+            this.symbolValidator,
+          ],
+        ],
         confirmPassword: ['', Validators.required],
       },
       { validators: this.passwordMatchValidator }
     );
+
+    // Subscribe to password changes to calculate strength
+    this.signupForm.get('password')?.valueChanges.subscribe((password) => {
+      this.calculatePasswordStrength(password);
+    });
+  }
+
+  uppercaseValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasUppercase = /[A-Z]/.test(value);
+    return hasUppercase ? null : { hasNoUppercase: true };
+  }
+
+  lowercaseValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasLowercase = /[a-z]/.test(value);
+    return hasLowercase ? null : { hasNoLowercase: true };
+  }
+
+  numberValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasNumber = /[0-9]/.test(value);
+    return hasNumber ? null : { hasNoNumber: true };
+  }
+
+  symbolValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+    return hasSymbol ? null : { hasNoSymbol: true };
+  }
+
+  calculatePasswordStrength(password: string): void {
+    if (!password) {
+      this.passwordStrength = '';
+      return;
+    }
+
+    let score = 0;
+
+    // Length check
+    if (password.length >= 12) score += 1;
+    if (password.length >= 14) score += 1;
+
+    // Character type checks
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 1;
+
+    // Variety check
+    const uniqueChars = new Set(password).size;
+    if (uniqueChars > password.length * 0.7) score += 1;
+
+    // Extra points for exceptional length
+    if (password.length >= 16) score += 1;
+    if (password.length >= 20) score += 1;
+
+    // Determine strength level
+    if (score <= 2) this.passwordStrength = 'muy-débil';
+    else if (score <= 4) this.passwordStrength = 'débil';
+    else if (score <= 6) this.passwordStrength = 'media';
+    else if (score < 8) this.passwordStrength = 'fuerte';
+    else this.passwordStrength = 'muy-fuerte'; // Changed from "score <= 8" to "score < 8"
   }
 
   passwordMatchValidator(form: FormGroup) {

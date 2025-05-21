@@ -25,6 +25,7 @@ Un sistema completo de autenticación desarrollado con Angular 18 (frontend) y .
 - Ejecución del Proyecto
 - Características
 - Seguridad
+  - Sistema de Validación de Contraseñas
 - Implementación de Hashing de Contraseñas
 
 ## 📝 Descripción
@@ -190,6 +191,47 @@ La aplicación Angular se ejecutará en `http://localhost:4200`.
 - Protección contra múltiples intentos fallidos de inicio de sesión (bloqueo de cuenta)
 - Tokens JWT con tiempo de expiración
 - HTTPS para comunicaciones seguras
+
+### Sistema de Validación de Contraseñas
+
+El sistema implementa un robusto mecanismo de validación de contraseñas en el frontend que garantiza que los usuarios creen credenciales seguras:
+
+#### Requisitos de Contraseñas
+
+- **Longitud mínima:** 12 caracteres (recomendado 14+)
+- **Complejidad obligatoria:**
+  - Al menos una letra mayúscula
+  - Al menos una letra minúscula
+  - Al menos un número
+  - Al menos un símbolo especial (@, $, !, %, \*, ?, &, etc.)
+
+#### Indicador de Fortaleza
+
+- **Visualización en tiempo real** mientras el usuario escribe
+- **Escala de cinco niveles:**
+  - Muy débil (rojo)
+  - Débil (naranja)
+  - Media (amarillo)
+  - Fuerte (azul)
+  - Muy fuerte (verde)
+- **Barra de progreso** con código de colores
+
+#### Sistema de Puntuación
+
+El indicador de fortaleza evalúa las contraseñas basándose en:
+
+- **Longitud:** puntos adicionales para contraseñas de 12+, 14+, 16+ y 20+ caracteres
+- **Variedad de caracteres:** uso de mayúsculas, minúsculas, números y símbolos
+- **Unicidad de caracteres:** al menos 70% de caracteres únicos
+- **Puntuación máxima:** 9 puntos (para calificar como "muy fuerte")
+
+#### Validación en Tiempo Real
+
+- Mensajes de error específicos y claros para cada requisito no cumplido
+- Validación instantánea mientras el usuario escribe
+- Interfaz intuitiva con feedback visual
+
+Esta implementación sigue las mejores prácticas de seguridad modernas y ayuda a los usuarios a crear contraseñas que sean tanto seguras como memorables.
 
 ## 🔒 Implementación de Hashing de Contraseñas
 
