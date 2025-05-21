@@ -16,8 +16,10 @@ namespace backend.Services.Auth
         Task<UserDTO?> GetUserByEmailAsync(string email);
         Task<bool> ResetPasswordAsync(int userId, string newPassword);
         Task<bool> RegisterVerifiedUserAsync(
-            string username, string email, string givenNames,
-            string pSurname, string mSurname, string phoneNumber,
+            string username,
+            string email,
+            //string givenNames,
+            //string pSurname, string mSurname, string phoneNumber,
             string passwordHash);
         }
 }

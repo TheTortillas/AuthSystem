@@ -34,10 +34,10 @@ namespace backend.Services.JWT
                     new Claim("id", user.Id.ToString()),
                     new Claim("username", user.Username),
                     new Claim("email", user.Email),
-                    new Claim("givennames", user.GivenNames),
-                    new Claim("psurname", user.PSurname),
-                    new Claim("msurname", user.MSurname ?? string.Empty),
-                    new Claim("phonenumber", user.PhoneNumber),
+                    //new Claim("givennames", user.GivenNames),
+                    //new Claim("psurname", user.PSurname),
+                    //new Claim("msurname", user.MSurname ?? string.Empty),
+                    //new Claim("phonenumber", user.PhoneNumber),
                     new Claim("createdat", user.CreatedAt.ToString("o")),
                     new Claim("lastlogin", user.LastLogin?.ToString("o") ?? string.Empty)
                 }),
@@ -72,10 +72,10 @@ namespace backend.Services.JWT
             var id = jwtToken.Claims.First(x => x.Type == "id").Value;
             var username = jwtToken.Claims.First(x => x.Type == "username").Value;
             var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-            var givenNames = jwtToken.Claims.First(x => x.Type == "givennames").Value;
-            var pSurname = jwtToken.Claims.First(x => x.Type == "psurname").Value;
-            var mSurname = jwtToken.Claims.First(x => x.Type == "msurname").Value;
-            var phoneNumber = jwtToken.Claims.First(x => x.Type == "phonenumber").Value;
+            //var givenNames = jwtToken.Claims.First(x => x.Type == "givennames").Value;
+            //var pSurname = jwtToken.Claims.First(x => x.Type == "psurname").Value;
+            //var mSurname = jwtToken.Claims.First(x => x.Type == "msurname").Value;
+            //var phoneNumber = jwtToken.Claims.First(x => x.Type == "phonenumber").Value;
             var createdAtStr = jwtToken.Claims.First(x => x.Type == "createdat").Value;
             var lastLoginStr = jwtToken.Claims.First(x => x.Type == "lastlogin").Value;
 
@@ -83,11 +83,11 @@ namespace backend.Services.JWT
             {
                 Id = int.Parse(id),
                 Username = username,
-                Email = email,
-                GivenNames = givenNames,
-                PSurname = pSurname,
-                MSurname = string.IsNullOrEmpty(mSurname) ? null : mSurname,
-                PhoneNumber = phoneNumber,
+                //Email = email,
+                //GivenNames = givenNames,
+                //PSurname = pSurname,
+                //MSurname = string.IsNullOrEmpty(mSurname) ? null : mSurname,
+                //PhoneNumber = phoneNumber,
                 CreatedAt = DateTime.Parse(createdAtStr),
                 LastLogin = string.IsNullOrEmpty(lastLoginStr) ? null : DateTime.Parse(lastLoginStr)
             };
@@ -143,10 +143,10 @@ namespace backend.Services.JWT
         public string CreateRegistrationToken(
             string username,
             string email,
-            string givenNames,
-            string pSurname,
-            string mSurname,
-            string phoneNumber,
+            //string givenNames,
+            //string pSurname,
+            //string mSurname,
+            //string phoneNumber,
             string passwordHash
             )
         {
@@ -159,10 +159,10 @@ namespace backend.Services.JWT
             new Claim("type", "Registration"),
             new Claim("username", username),
             new Claim("email", email),
-            new Claim("givenNames", givenNames),
-            new Claim("pSurname", pSurname),
-            new Claim("mSurname", mSurname ?? ""),
-            new Claim("phoneNumber", phoneNumber),
+            //new Claim("givenNames", givenNames),
+            //new Claim("pSurname", pSurname),
+            //new Claim("mSurname", mSurname ?? ""),
+            //new Claim("phoneNumber", phoneNumber),
             new Claim("passwordHash", passwordHash),
         }),
                 Expires = DateTime.UtcNow.AddHours(24), // 24 horas para verificar

@@ -5,10 +5,6 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(50) NOT NULL UNIQUE,
-    given_names VARCHAR(50) NOT NULL,
-    p_surname VARCHAR(50) NOT NULL, 
-    m_surname VARCHAR(50), 
-    phone_number VARCHAR(20) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
@@ -16,14 +12,10 @@ CREATE TABLE users (
 );
 
 DELIMITER $$
--- Updated procedure to insert a new user without requiring salt
+-- Updated procedure to insert a new user with simplified fields
 CREATE PROCEDURE sp_insert_user(
     IN p_username VARCHAR(50),
     IN p_email VARCHAR(50),
-    IN p_given_names VARCHAR(50),
-    IN p_p_surname VARCHAR(50),
-    IN p_m_surname VARCHAR(50),
-    IN p_phone_number VARCHAR(20),
     IN p_password_hash VARCHAR(255),
     OUT p_status_code INT,
     OUT p_message VARCHAR(255)
@@ -38,9 +30,8 @@ BEGIN
 
     START TRANSACTION;
 
-    -- Notice we no longer include password_salt
-    INSERT INTO users (username, email, given_names, p_surname, m_surname, phone_number, password_hash)
-    VALUES (p_username, p_email, p_given_names, p_p_surname, p_m_surname, p_phone_number, p_password_hash);
+    INSERT INTO users (username, email, password_hash)
+    VALUES (p_username, p_email, p_password_hash);
 
     COMMIT;
 
@@ -104,7 +95,7 @@ BEGIN
 END$$
 
 DELIMITER $$
--- Updated procedure to get user by email
+-- Updated procedure to get user by email with simplified fields
 CREATE PROCEDURE sp_get_user_by_email(
     IN p_email VARCHAR(50),
     OUT p_status_code INT,
@@ -129,10 +120,9 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- Return the user as a result set - No longer including password_salt
+        -- Return the user with simplified fields
         SELECT 
-            id, username, given_names, p_surname, m_surname, email, phone_number, 
-            password_hash, created_at, last_login, failed_attempts
+            id, username, email, password_hash, created_at, last_login, failed_attempts
         FROM users
         WHERE email = p_email;
         
@@ -145,7 +135,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
--- Updated procedure to get user by username
+-- Updated procedure to get user by username with simplified fields
 CREATE PROCEDURE sp_get_user_by_username(
     IN p_username VARCHAR(50),
     OUT p_status_code INT,
@@ -170,10 +160,9 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- Return the user as a result set - No longer including password_salt
+        -- Return the user with simplified fields
         SELECT 
-            id, username, given_names, p_surname, m_surname, email, phone_number, 
-            password_hash, created_at, last_login, failed_attempts
+            id, username, email, password_hash, created_at, last_login, failed_attempts
         FROM users
         WHERE username = p_username;
         
@@ -221,7 +210,7 @@ BEGIN
 END$$
 
 DELIMITER $$
--- Updated procedure to reset password without requiring salt
+-- Updated procedure to reset password
 CREATE PROCEDURE sp_reset_password(
     IN p_user_id INT,
     IN p_new_password_hash VARCHAR(255),
@@ -247,7 +236,6 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- No longer updating password_salt
         UPDATE users 
         SET password_hash = p_new_password_hash,
             failed_attempts = 0

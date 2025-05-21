@@ -13,10 +13,10 @@ const HttpOptions = {
 export interface RegisterRequest {
   username: string;
   email: string;
-  givenNames: string;
-  pSurname: string;
-  mSurname?: string;
-  phoneNumber: string;
+  // givenNames: string;
+  // pSurname: string;
+  // mSurname?: string;
+  // phoneNumber: string;
   password: string;
 }
 

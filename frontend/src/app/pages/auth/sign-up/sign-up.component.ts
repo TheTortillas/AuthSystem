@@ -38,13 +38,13 @@ export class SignUpComponent {
       {
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
-        givenNames: ['', Validators.required],
-        pSurname: ['', Validators.required],
-        mSurname: [''],
-        phoneNumber: [
-          '',
-          [Validators.required, Validators.pattern('^[0-9]{10,15}$')],
-        ],
+        // givenNames: ['', Validators.required],
+        // pSurname: ['', Validators.required],
+        // mSurname: [''],
+        // phoneNumber: [
+        //   '',
+        //   [Validators.required, Validators.pattern('^[0-9]{10,15}$')],
+        // ],
         password: [
           '',
           [
@@ -164,10 +164,10 @@ export class SignUpComponent {
       const registerData: RegisterRequest = {
         username: formData.username,
         email: formData.email,
-        givenNames: formData.givenNames,
-        pSurname: formData.pSurname,
-        mSurname: formData.mSurname || '',
-        phoneNumber: formData.phoneNumber,
+        // givenNames: formData.givenNames,
+        // pSurname: formData.pSurname,
+        // mSurname: formData.mSurname || '',
+        // phoneNumber: formData.phoneNumber,
         password: formData.password,
       };
 

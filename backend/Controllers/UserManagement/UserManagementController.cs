@@ -51,10 +51,10 @@ namespace backend.Controllers.UserManagement
                 var registrationToken = _jwtService.CreateRegistrationToken(
                     request.Username,
                     request.Email,
-                    request.GivenNames,
-                    request.PSurname,
-                    request.MSurname,
-                    request.PhoneNumber,
+                    //request.GivenNames,
+                    //request.PSurname,
+                    //request.MSurname,
+                    //request.PhoneNumber,
                     passwordHash
                 );
 

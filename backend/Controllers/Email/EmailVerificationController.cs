@@ -83,16 +83,16 @@ namespace backend.Controllers.Email
                 // Extraer datos de usuario del token  
                 var username = jwtToken.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
                 var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-                var givenNames = jwtToken.Claims.FirstOrDefault(c => c.Type == "givenNames")?.Value;
-                var pSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "pSurname")?.Value;
-                var mSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "mSurname")?.Value;
-                var phoneNumber = jwtToken.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
+                //var givenNames = jwtToken.Claims.FirstOrDefault(c => c.Type == "givenNames")?.Value;
+                //var pSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "pSurname")?.Value;
+                //var mSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "mSurname")?.Value;
+                //var phoneNumber = jwtToken.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
                 var passwordHash = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordHash")?.Value;
 
                 // Validar que todos los datos necesarios estén presentes  
-                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
-                    string.IsNullOrEmpty(givenNames) || string.IsNullOrEmpty(pSurname) ||
-                    string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(passwordHash) 
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(passwordHash)
+                    //string.IsNullOrEmpty(givenNames) || string.IsNullOrEmpty(pSurname) ||
+                    //string.IsNullOrEmpty(phoneNumber)  
                 )
                 {
                     return BadRequest(new { message = "Datos de registro incompletos en el token" });
@@ -100,8 +100,10 @@ namespace backend.Controllers.Email
 
                 // Registrar al usuario con los datos del token  
                 var success = await _authService.RegisterVerifiedUserAsync(
-                    username, email, givenNames, pSurname, mSurname,
-                    phoneNumber, passwordHash);
+                    username, email, 
+                    //givenNames, pSurname, mSurname,
+                    //phoneNumber, 
+                    passwordHash);
 
                 if (!success)
                 {

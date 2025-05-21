@@ -25,10 +25,10 @@ namespace backend.Repositories.User
 
                     cmd.Parameters.AddWithValue("p_username", user.Username);
                     cmd.Parameters.AddWithValue("p_email", user.Email);
-                    cmd.Parameters.AddWithValue("p_given_names", user.GivenNames);
-                    cmd.Parameters.AddWithValue("p_p_surname", user.PSurname);
-                    cmd.Parameters.AddWithValue("p_m_surname", user.MSurname ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("p_phone_number", user.PhoneNumber);
+                    //cmd.Parameters.AddWithValue("p_given_names", user.GivenNames);
+                    //cmd.Parameters.AddWithValue("p_p_surname", user.PSurname);
+                    //cmd.Parameters.AddWithValue("p_m_surname", user.MSurname ?? (object)DBNull.Value);
+                    //cmd.Parameters.AddWithValue("p_phone_number", user.PhoneNumber);
                     cmd.Parameters.AddWithValue("p_password_hash", user.Password);
 
                     MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
@@ -89,11 +89,11 @@ namespace backend.Repositories.User
                             {
                                 Id = reader.GetInt32("id"),
                                 Username = reader.GetString("username"),
-                                GivenNames = reader.GetString("given_names"),
-                                PSurname = reader.GetString("p_surname"),
-                                MSurname = reader.IsDBNull(reader.GetOrdinal("m_surname")) ? null : reader.GetString("m_surname"),
+                                //GivenNames = reader.GetString("given_names"),
+                                //PSurname = reader.GetString("p_surname"),
+                                //MSurname = reader.IsDBNull(reader.GetOrdinal("m_surname")) ? null : reader.GetString("m_surname"),
                                 Email = reader.GetString("email"),
-                                PhoneNumber = reader.GetString("phone_number"),
+                                //PhoneNumber = reader.GetString("phone_number"),
                                 Password = reader.GetString("password_hash"),
                                 CreatedAt = reader.GetDateTime("created_at"),
                                 LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
@@ -203,11 +203,11 @@ namespace backend.Repositories.User
                             {
                                 Id = reader.GetInt32("id"),
                                 Username = reader.GetString("username"),
-                                GivenNames = reader.GetString("given_names"),
-                                PSurname = reader.GetString("p_surname"),
-                                MSurname = reader.IsDBNull(reader.GetOrdinal("m_surname")) ? null : reader.GetString("m_surname"),
+                                //GivenNames = reader.GetString("given_names"),
+                                //PSurname = reader.GetString("p_surname"),
+                                //MSurname = reader.IsDBNull(reader.GetOrdinal("m_surname")) ? null : reader.GetString("m_surname"),
                                 Email = reader.GetString("email"),
-                                PhoneNumber = reader.GetString("phone_number"),
+                                //PhoneNumber = reader.GetString("phone_number"),
                                 Password = reader.GetString("password_hash"),
                                 CreatedAt = reader.GetDateTime("created_at"),
                                 LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
@@ -317,8 +317,8 @@ namespace backend.Repositories.User
         }
 
         public async Task<bool> RegisterVerifiedUserAsync(
-            string username, string email, string givenNames,
-            string pSurname, string mSurname, string phoneNumber,
+            string username, string email,
+            //string givenNames, string pSurname, string mSurname, string phoneNumber,
             string passwordHash)
         {
             try
@@ -330,10 +330,10 @@ namespace backend.Repositories.User
 
                     cmd.Parameters.AddWithValue("p_username", username);
                     cmd.Parameters.AddWithValue("p_email", email);
-                    cmd.Parameters.AddWithValue("p_given_names", givenNames);
-                    cmd.Parameters.AddWithValue("p_p_surname", pSurname);
-                    cmd.Parameters.AddWithValue("p_m_surname", mSurname);
-                    cmd.Parameters.AddWithValue("p_phone_number", phoneNumber);
+                    //cmd.Parameters.AddWithValue("p_given_names", givenNames);
+                    //cmd.Parameters.AddWithValue("p_p_surname", pSurname);
+                    //cmd.Parameters.AddWithValue("p_m_surname", mSurname);
+                    //cmd.Parameters.AddWithValue("p_phone_number", phoneNumber);
                     cmd.Parameters.AddWithValue("p_password_hash", passwordHash);
 
                     MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)

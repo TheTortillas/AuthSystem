@@ -26,11 +26,11 @@ namespace backend.Services.Auth
             var user = new UserDTO
             {
                 Username = request.Username,
-                GivenNames = request.GivenNames,
-                PSurname = request.PSurname,
-                MSurname = request.MSurname,
+                //GivenNames = request.GivenNames,
+                //PSurname = request.PSurname,
+                //MSurname = request.MSurname,
                 Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
+                //PhoneNumber = request.PhoneNumber,
                 Password = passwordHash,
             };
 
@@ -125,10 +125,13 @@ namespace backend.Services.Auth
             return await _userRepository.GetUserByEmailAsync(email);
         }
 
-        public async Task<bool> RegisterVerifiedUserAsync(string username, string email, string givenNames, string pSurname, string mSurname, string phoneNumber, string passwordHash)
+        public async Task<bool> RegisterVerifiedUserAsync(
+            string username, string email,
+            //string givenNames, string pSurname, string mSurname, string phoneNumber,
+            string passwordHash)
         {
             // Call the repository method to register the verified user
-            return await _userRepository.RegisterVerifiedUserAsync(username, email, givenNames, pSurname, mSurname, phoneNumber, passwordHash);
+            return await _userRepository.RegisterVerifiedUserAsync(username, email,/* givenNames, pSurname, mSurname, phoneNumber,*/ passwordHash);
         }
     }
 }
