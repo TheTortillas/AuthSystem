@@ -1,15 +1,77 @@
 <div class="p-6">
-  <div class="bg-white rounded-lg shadow-lg p-6">
-    <!-- Header with logout button -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Dashboard</h1>
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
+    <!-- Header with logo -->
+    <div class="flex justify-center items-center mb-4">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold mb-4">CRIPTOGRAFÍA</h1>
+      </div>
+    </div>
+
+    <!-- Welcome message -->
+    <div class="mb-6 text-center">
+      <h2 class="text-xl font-medium">
+        Bienvenido {{ username || "[Usuario]" }}
+      </h2>
+    </div>
+
+    <!-- Datos Curiosos section -->
+    <div class="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-md">
+      <h3 class="text-lg font-semibold mb-2">Datos Curiosos</h3>
+      <ul class="list-disc pl-5 space-y-2">
+        <li>
+          <a
+            (click)="navigateToCryptoTopic('clasica')"
+            class="text-blue-600 hover:text-blue-800 cursor-pointer"
+          >
+            Criptografía Clásica
+          </a>
+        </li>
+        <li>
+          <a
+            (click)="navigateToCryptoTopic('moderna')"
+            class="text-blue-600 hover:text-blue-800 cursor-pointer"
+          >
+            Criptografía Moderna
+          </a>
+        </li>
+        <li>
+          <a
+            (click)="navigateToCryptoTopic('tendencias')"
+            class="text-blue-600 hover:text-blue-800 cursor-pointer"
+          >
+            Tendencias Criptográficas
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Topic information section (conditionally shown) -->
+    <div
+      *ngIf="selectedTopic"
+      class="mb-6 bg-gray-50 border border-gray-200 p-4 rounded-md"
+    >
+      <h2 class="text-xl font-bold mb-2">{{ topicTitle }}</h2>
+      <div [innerHTML]="topicContent" class="mb-4"></div>
+
+      <div class="flex justify-center">
+        <button
+          (click)="generatePDF()"
+          class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-lg transition-colors"
+        >
+          Generar PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Logout button -->
+    <div class="flex justify-end mt-4">
       <button
         (click)="logout()"
-        class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center transition-colors"
+        class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-lg flex items-center transition-colors text-sm"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 mr-1"
+          class="h-4 w-4 mr-1"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -23,39 +85,9 @@
       </button>
     </div>
 
-    <div class="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-md">
-      <h2 class="text-lg font-semibold mb-2">Información de Usuario</h2>
-      <div *ngIf="username" class="mb-2">
-        <span class="font-medium">Usuario:</span> {{ username }}
-      </div>
-      <div *ngIf="userEmail" class="mb-2">
-        <span class="font-medium">Email:</span> {{ userEmail }}
-      </div>
-    </div>
-
-    <!-- Rest of your dashboard content remains unchanged -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Sample dashboard cards -->
-      <div
-        class="bg-blue-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-      >
-        <h3 class="font-semibold text-blue-800 mb-2">Funcionalidad 1</h3>
-        <p>Descripción de la funcionalidad.</p>
-      </div>
-
-      <div
-        class="bg-green-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-      >
-        <h3 class="font-semibold text-green-800 mb-2">Funcionalidad 2</h3>
-        <p>Descripción de la funcionalidad.</p>
-      </div>
-
-      <div
-        class="bg-purple-100 p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-      >
-        <h3 class="font-semibold text-purple-800 mb-2">Funcionalidad 3</h3>
-        <p>Descripción de la funcionalidad.</p>
-      </div>
+    <!-- Copyright notice -->
+    <div class="text-center text-xs text-gray-500 mt-4">
+      © 2024 Criptografía CNC. Todos los derechos reservados.
     </div>
   </div>
 </div>
