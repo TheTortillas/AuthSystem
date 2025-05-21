@@ -65,7 +65,7 @@ namespace backend.Services.JWT
 
             if (jwtToken == null)
             {
-                throw new SecurityTokenException( errorMessage );
+                throw new SecurityTokenException(errorMessage);
             }
 
             // Extraer claims
@@ -147,8 +147,8 @@ namespace backend.Services.JWT
             string pSurname,
             string mSurname,
             string phoneNumber,
-            string passwordHash,
-            string salt)
+            string passwordHash
+            )
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["JWTSettings:securityKey"]);
@@ -164,7 +164,6 @@ namespace backend.Services.JWT
             new Claim("mSurname", mSurname ?? ""),
             new Claim("phoneNumber", phoneNumber),
             new Claim("passwordHash", passwordHash),
-            new Claim("passwordSalt", salt)
         }),
                 Expires = DateTime.UtcNow.AddHours(24), // 24 horas para verificar
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),

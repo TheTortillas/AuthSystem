@@ -52,6 +52,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IPasswordHasher<RegisterRequestDTO>, PasswordHasher<RegisterRequestDTO>>();
 builder.Services.AddSingleton<jwtService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
 // Configuracion de JWT
 builder.Services.AddAuthentication(options =>

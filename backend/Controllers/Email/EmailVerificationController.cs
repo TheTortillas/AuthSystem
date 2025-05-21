@@ -88,13 +88,12 @@ namespace backend.Controllers.Email
                 var mSurname = jwtToken.Claims.FirstOrDefault(c => c.Type == "mSurname")?.Value;
                 var phoneNumber = jwtToken.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
                 var passwordHash = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordHash")?.Value;
-                var passwordSalt = jwtToken.Claims.FirstOrDefault(c => c.Type == "passwordSalt")?.Value;
 
                 // Validar que todos los datos necesarios estén presentes  
                 if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
                     string.IsNullOrEmpty(givenNames) || string.IsNullOrEmpty(pSurname) ||
-                    string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(passwordHash) ||
-                    string.IsNullOrEmpty(passwordSalt))
+                    string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(passwordHash) 
+                )
                 {
                     return BadRequest(new { message = "Datos de registro incompletos en el token" });
                 }
@@ -102,7 +101,7 @@ namespace backend.Controllers.Email
                 // Registrar al usuario con los datos del token  
                 var success = await _authService.RegisterVerifiedUserAsync(
                     username, email, givenNames, pSurname, mSurname,
-                    phoneNumber, passwordHash, passwordSalt);
+                    phoneNumber, passwordHash);
 
                 if (!success)
                 {

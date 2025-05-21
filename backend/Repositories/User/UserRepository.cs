@@ -30,7 +30,6 @@ namespace backend.Repositories.User
                     cmd.Parameters.AddWithValue("p_m_surname", user.MSurname ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("p_phone_number", user.PhoneNumber);
                     cmd.Parameters.AddWithValue("p_password_hash", user.Password);
-                    cmd.Parameters.AddWithValue("p_password_salt", user.Salt);
 
                     MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
                     {
@@ -96,7 +95,6 @@ namespace backend.Repositories.User
                                 Email = reader.GetString("email"),
                                 PhoneNumber = reader.GetString("phone_number"),
                                 Password = reader.GetString("password_hash"),
-                                Salt = reader.GetString("password_salt"),
                                 CreatedAt = reader.GetDateTime("created_at"),
                                 LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
                                 // Default to 0 if column doesn't exist
@@ -211,7 +209,6 @@ namespace backend.Repositories.User
                                 Email = reader.GetString("email"),
                                 PhoneNumber = reader.GetString("phone_number"),
                                 Password = reader.GetString("password_hash"),
-                                Salt = reader.GetString("password_salt"),
                                 CreatedAt = reader.GetDateTime("created_at"),
                                 LastLogin = reader.IsDBNull(reader.GetOrdinal("last_login")) ? null : reader.GetDateTime("last_login"),
                                 FailedAttempts = 0
@@ -282,7 +279,7 @@ namespace backend.Repositories.User
             }
         }
 
-        public async Task<bool> ResetPasswordAsync(int userId, string passwordHash, string salt)
+        public async Task<bool> ResetPasswordAsync(int userId, string passwordHash)
         {
             try
             {
@@ -293,7 +290,6 @@ namespace backend.Repositories.User
 
                     cmd.Parameters.AddWithValue("p_user_id", userId);
                     cmd.Parameters.AddWithValue("p_new_password_hash", passwordHash);
-                    cmd.Parameters.AddWithValue("p_new_password_salt", salt);
 
                     MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
                     {
@@ -323,7 +319,7 @@ namespace backend.Repositories.User
         public async Task<bool> RegisterVerifiedUserAsync(
             string username, string email, string givenNames,
             string pSurname, string mSurname, string phoneNumber,
-            string passwordHash, string passwordSalt)
+            string passwordHash)
         {
             try
             {
@@ -339,7 +335,6 @@ namespace backend.Repositories.User
                     cmd.Parameters.AddWithValue("p_m_surname", mSurname);
                     cmd.Parameters.AddWithValue("p_phone_number", phoneNumber);
                     cmd.Parameters.AddWithValue("p_password_hash", passwordHash);
-                    cmd.Parameters.AddWithValue("p_password_salt", passwordSalt);
 
                     MySqlParameter statusParam = new MySqlParameter("p_status_code", MySqlDbType.Int32)
                     {

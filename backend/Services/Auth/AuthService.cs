@@ -10,29 +10,18 @@ namespace backend.Services.Auth
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher<RegisterRequestDTO> _passwordHasher;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public AuthService(IUserRepository userRepository, IPasswordHasher<RegisterRequestDTO> passwordHasher)
+        public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
         }
 
-        // Method to generate a salt
-        public string GenerateSalt(int size = SecurityConstants.DefaultSaltSize)
-        {
-            var saltBytes = new byte[size];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(saltBytes);
-            }
-            return Convert.ToBase64String(saltBytes);
-        }
-
         public async Task<bool> RegisterUserAsync(RegisterRequestDTO request)
         {
-            var salt = GenerateSalt();
-            var saltedPassword = request.Password + salt;
+            // Hash the password with our new PasswordHasher
+            string passwordHash = _passwordHasher.Hash(request.Password);
 
             var user = new UserDTO
             {
@@ -42,8 +31,7 @@ namespace backend.Services.Auth
                 MSurname = request.MSurname,
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
-                Password = _passwordHasher.HashPassword(request, saltedPassword),
-                Salt = salt,
+                Password = passwordHash,
             };
 
             return await _userRepository.CreateUserAsync(user);
@@ -65,11 +53,8 @@ namespace backend.Services.Auth
                 return (null, "Cuenta bloqueada por múltiples intentos fallidos. Contacte a soporte.", 423);
             }
 
-            // Verify password
-            var saltedPassword = request.Password + user.Salt;
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(null, user.Password, saltedPassword);
-
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            // Verify password using the new passwordHasher
+            if (!_passwordHasher.Verify(request.Password, user.Password))
             {
                 // Increment failed attempts counter
                 await _userRepository.IncrementFailedAttemptsAsync(user.Id);
@@ -97,11 +82,8 @@ namespace backend.Services.Auth
                 return (null, "Cuenta bloqueada por múltiples intentos fallidos. Contacte a soporte.", 423);
             }
 
-            // Verify password
-            var saltedPassword = request.Password + user.Salt;
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(null, user.Password, saltedPassword);
-
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            // Verify password using the new passwordHasher
+            if (!_passwordHasher.Verify(request.Password, user.Password))
             {
                 // Increment failed attempts counter
                 await _userRepository.IncrementFailedAttemptsAsync(user.Id);
@@ -113,6 +95,16 @@ namespace backend.Services.Auth
             return (user, null, 200);
         }
 
+        public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
+        {
+            // Hash the new password with our PasswordHasher
+            string passwordHash = _passwordHasher.Hash(newPassword);
+
+            // The salt is embedded in the password hash, so we pass empty string
+            return await _userRepository.ResetPasswordAsync(userId, passwordHash);
+        }
+
+        // Other methods remain unchanged...
         public async Task<bool> IncrementFailedAttemptsAsync(int userId)
         {
             return await _userRepository.IncrementFailedAttemptsAsync(userId);
@@ -133,23 +125,10 @@ namespace backend.Services.Auth
             return await _userRepository.GetUserByEmailAsync(email);
         }
 
-        public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
+        public async Task<bool> RegisterVerifiedUserAsync(string username, string email, string givenNames, string pSurname, string mSurname, string phoneNumber, string passwordHash)
         {
-            // Generar nueva salt y hash para la nueva contraseña
-            var salt = GenerateSalt();
-            var saltedPassword = newPassword + salt;
-            var passwordHash = _passwordHasher.HashPassword(new RegisterRequestDTO(), saltedPassword);
-
-            return await _userRepository.ResetPasswordAsync(userId, passwordHash, salt);
-        }
-        public async Task<bool> RegisterVerifiedUserAsync(
-            string username, string email, string givenNames,
-            string pSurname, string mSurname, string phoneNumber,
-            string passwordHash, string passwordSalt)
-        {
-            return await _userRepository.RegisterVerifiedUserAsync(
-                username, email, givenNames, pSurname, mSurname,
-                phoneNumber, passwordHash, passwordSalt);
+            // Call the repository method to register the verified user
+            return await _userRepository.RegisterVerifiedUserAsync(username, email, givenNames, pSurname, mSurname, phoneNumber, passwordHash);
         }
     }
 }

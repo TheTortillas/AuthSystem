@@ -18,14 +18,14 @@ namespace backend.Controllers.UserManagement
         private readonly IAuthService _authService;
         private readonly jwtService _jwtService;
         private readonly IEmailService IEmailService;
-        private readonly IPasswordHasher<RegisterRequestDTO> _passwordHasher;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UserManagementController(IAuthService authService, jwtService jwtService, IEmailService emailService)
+        public UserManagementController(IAuthService authService, jwtService jwtService, IEmailService emailService, IPasswordHasher passwordHasher)
         {
             _authService = authService;
             _jwtService = jwtService;
             IEmailService = emailService;
-            _passwordHasher = new PasswordHasher<RegisterRequestDTO>();
+            _passwordHasher = passwordHasher;
         }
 
         /// <summary>
@@ -44,12 +44,10 @@ namespace backend.Controllers.UserManagement
                     return BadRequest(ModelState);
                 }
 
-                // Generar hash y salt de la contraseña
-                var salt = _authService.GenerateSalt();
-                var saltedPassword = request.Password + salt;
-                var passwordHash = _passwordHasher.HashPassword(request, saltedPassword);
+                // Generate password hash (salt is embedded in the hash)
+                var passwordHash = _passwordHasher.Hash(request.Password);
 
-                // Crear un token que contenga todos los datos del usuario
+                // Create a token containing all user data
                 var registrationToken = _jwtService.CreateRegistrationToken(
                     request.Username,
                     request.Email,
@@ -57,11 +55,10 @@ namespace backend.Controllers.UserManagement
                     request.PSurname,
                     request.MSurname,
                     request.PhoneNumber,
-                    passwordHash,
-                    salt
+                    passwordHash
                 );
 
-                // Enviar correo de verificación
+                // Send verification email
                 var frontendUrl = Request.Headers["Origin"].ToString();
                 await IEmailService.SendVerificationEmail(request.Email, registrationToken, frontendUrl);
 

@@ -10,14 +10,13 @@ CREATE TABLE users (
     m_surname VARCHAR(50), 
     phone_number VARCHAR(20) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    password_salt VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
     failed_attempts INT DEFAULT 0
 );
 
 DELIMITER $$
--- Procedimiento para insertar un nuevo usuario
+-- Updated procedure to insert a new user without requiring salt
 CREATE PROCEDURE sp_insert_user(
     IN p_username VARCHAR(50),
     IN p_email VARCHAR(50),
@@ -26,7 +25,6 @@ CREATE PROCEDURE sp_insert_user(
     IN p_m_surname VARCHAR(50),
     IN p_phone_number VARCHAR(20),
     IN p_password_hash VARCHAR(255),
-    IN p_password_salt VARCHAR(255),
     OUT p_status_code INT,
     OUT p_message VARCHAR(255)
 )
@@ -40,17 +38,17 @@ BEGIN
 
     START TRANSACTION;
 
-    INSERT INTO users (username, email, given_names, p_surname, m_surname, phone_number, password_hash, password_salt)
-    VALUES (p_username, p_email, p_given_names, p_p_surname, p_m_surname, p_phone_number, p_password_hash, p_password_salt);
+    -- Notice we no longer include password_salt
+    INSERT INTO users (username, email, given_names, p_surname, m_surname, phone_number, password_hash)
+    VALUES (p_username, p_email, p_given_names, p_p_surname, p_m_surname, p_phone_number, p_password_hash);
 
     COMMIT;
 
     SET p_status_code = 200;
     SET p_message = 'Usuario insertado exitosamente.';
 END$$
+DELIMITER ;
 
-DELIMITER $$
--- Procedimiento para el inicio de sesión de un usuario
 DELIMITER $$
 -- Procedimiento para el inicio de sesión de un usuario
 CREATE PROCEDURE sp_login_user(
@@ -106,7 +104,7 @@ BEGIN
 END$$
 
 DELIMITER $$
--- Procedimiento para obtener un usuario por email (Updated version)
+-- Updated procedure to get user by email
 CREATE PROCEDURE sp_get_user_by_email(
     IN p_email VARCHAR(50),
     OUT p_status_code INT,
@@ -131,10 +129,10 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- Return the user as a result set - Ensure failed_attempts is included
+        -- Return the user as a result set - No longer including password_salt
         SELECT 
             id, username, given_names, p_surname, m_surname, email, phone_number, 
-            password_hash, password_salt, created_at, last_login, failed_attempts
+            password_hash, created_at, last_login, failed_attempts
         FROM users
         WHERE email = p_email;
         
@@ -144,9 +142,10 @@ BEGIN
     
     COMMIT;
 END$$
+DELIMITER ;
 
 DELIMITER $$
--- Procedimiento para obtener un usuario por username
+-- Updated procedure to get user by username
 CREATE PROCEDURE sp_get_user_by_username(
     IN p_username VARCHAR(50),
     OUT p_status_code INT,
@@ -171,10 +170,10 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
-        -- Return the user as a result set
+        -- Return the user as a result set - No longer including password_salt
         SELECT 
             id, username, given_names, p_surname, m_surname, email, phone_number, 
-            password_hash, password_salt, created_at, last_login, failed_attempts
+            password_hash, created_at, last_login, failed_attempts
         FROM users
         WHERE username = p_username;
         
@@ -222,11 +221,10 @@ BEGIN
 END$$
 
 DELIMITER $$
--- Procedimiento para cambiar contraseña
+-- Updated procedure to reset password without requiring salt
 CREATE PROCEDURE sp_reset_password(
     IN p_user_id INT,
     IN p_new_password_hash VARCHAR(255),
-    IN p_new_password_salt VARCHAR(255),
     OUT p_status_code INT,
     OUT p_message VARCHAR(255)
 )
@@ -249,9 +247,9 @@ BEGIN
         SET p_status_code = 404;
         SET p_message = 'Error: Usuario no encontrado.';
     ELSE
+        -- No longer updating password_salt
         UPDATE users 
-        SET password_hash = p_new_password_hash, 
-            password_salt = p_new_password_salt,
+        SET password_hash = p_new_password_hash,
             failed_attempts = 0
         WHERE id = p_user_id;
         

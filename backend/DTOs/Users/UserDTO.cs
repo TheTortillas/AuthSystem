@@ -10,7 +10,6 @@
         public string? MSurname { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Salt { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
         public int FailedAttempts { get; set; }
