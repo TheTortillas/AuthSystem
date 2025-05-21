@@ -73,8 +73,11 @@ export class SignInComponent {
           this.isSubmitting = false;
 
           // Manejo específico de errores según el código de estado
-          if (error.status === 401) {
-            this.loginError = 'Nombre de usuario o contraseña incorrectos';
+          if (error.status === 401 || error.status === 423) {
+            // Use the server's error message directly
+            this.loginError =
+              error.error?.message ||
+              'Nombre de usuario o contraseña incorrectos';
           } else if (error.status === 403) {
             this.loginError =
               'Tu cuenta está bloqueada. Contacta al administrador.';
